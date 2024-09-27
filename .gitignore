@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Test File
+borgo_test.py
+outpost_test.py
+
 # C extensions
 *.so
 

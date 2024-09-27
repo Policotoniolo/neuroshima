@@ -26,8 +26,8 @@ class GameController:
 
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
-        self.cfg = [{'name':'paul', 'army':'outpost'},
-                    {'name':'benoit', 'army':'borgo'}]
+        self.cfg = [{'name':'paul', 'army':'outpost_test'},
+                    {'name':'benoit', 'army':'borgo_test'}]
         self.players = []
         self.number_of_players = number_of_players
         self.board = HexBoard(BOARD_LIMIT,DELTAS)
@@ -85,8 +85,10 @@ class GameController:
             tile_informations = self.get_info_from_id_tile(tile.id_tile, player)
             if tile_informations['action'] == "movement":
                 self._movement_tile(tile)
-            if tile_informations['action'] == "sniper":
+            elif tile_informations['action'] == "sniper":
                 self._sniper_tile(tile, player, event_list)
+            elif tile_informations['action'] == "grenade":
+                self._grenade_tile(tile, player, event_list)
 
     def _movement_tile(self, tile):
         """generate action tile of movement
@@ -108,6 +110,25 @@ class GameController:
         """Generate action tile for sniper tile
         """
 
+        tile_collided = pygame.sprite.spritecollideany(tile,
+                                                        self.view.tiles_board,
+                                                        pygame.sprite.collide_rect_ratio(0.75))
+        if tile.drag.dragging:
+            self.view.boardzone.displaygreenboard()
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if tile_collided is not None:
+            next_player = next_element(self.players, player)
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile, next_player)
+            if  tile_collided_info == {} or tile_collided_info["kind"] == "base":
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tile)
+                    self.view.tiles_board.remove(tile_collided)
+                    self.view.tiles_defausse.add(tile_collided)
+
+    def _grenade_tile(self, tile, player, event_list):
         tile_collided = pygame.sprite.spritecollideany(tile,
                                                         self.view.tiles_board,
                                                         pygame.sprite.collide_rect_ratio(0.75))
@@ -279,4 +300,3 @@ if __name__ == "__main__":
     # # print(game.get_info_from_id_tile('outpost-mouvement1', game.players[0])['kind'])
     game.run()
     # print(sys.path)
-
