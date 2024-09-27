@@ -106,20 +106,20 @@ class GameController:
     def _sniper_tile(self, tile, event_list):
         """Generate action tile for sniper tile
         """
+
+        tile_collided = pygame.sprite.spritecollideany(tile,
+                                                        self.view.tiles_board,
+                                                        pygame.sprite.collide_rect_ratio(0.75))
         if tile.drag.dragging:
             self.view.boardzone.displaygreenboard()
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
-        elif not tile.drag.dragging :
-            tile_collided = pygame.sprite.spritecollideany(tile,
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-            if tile_collided is not None:
-                if tile_collided.click_tile(event_list, self.view.displaysurf):
-                    print('yo')
-                    self.view.tiles_hand.remove(tile)
-                    self.view.tiles_board.remove(tile_collided)
-                    self.view.tiles_defausse.add(tile_collided)
+        if tile_collided is not None:
+            if tile_collided.click_tile(event_list, self.view.displaysurf):
+                print('yo')
+                self.view.tiles_hand.remove(tile)
+                self.view.tiles_board.remove(tile_collided)
+                self.view.tiles_defausse.add(tile_collided)
 
     def _start_game(self):
         """Initiate first turn for placing hq
