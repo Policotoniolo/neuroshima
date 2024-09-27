@@ -70,3 +70,16 @@ def coordinates_pixel_to_cube(pixel_position:tuple):
         Tuple: Cube coordinates
     """
     return BOARD_PIXEL_TO_CUBE[pixel_position]
+
+def next_element(list, element):
+    """return the next element of a list. 
+    Restart from the begining if the iterator is exhausted
+
+    Args:
+        list (List): list of elements
+        element (Objct): Start element
+    """
+    idx = list.index(element)
+    if idx >= len(list)-1:
+        return list[0]
+    return list[idx+1]

@@ -10,6 +10,7 @@ import pygame
 
 from model_script import Player, HexBoard
 from view import View
+from functions import next_element
 
 # pylint: disable=no-member
 
@@ -85,7 +86,7 @@ class GameController:
             if tile_informations['action'] == "movement":
                 self._movement_tile(tile)
             if tile_informations['action'] == "sniper":
-                self._sniper_tile(tile, event_list)
+                self._sniper_tile(tile, player, event_list)
 
     def _movement_tile(self, tile):
         """generate action tile of movement
@@ -103,7 +104,7 @@ class GameController:
                 self.view.tiles_board.remove(tile_collided)
                 self.view.tiles_board_moving.add(tile_collided)
 
-    def _sniper_tile(self, tile, event_list):
+    def _sniper_tile(self, tile, player, event_list):
         """Generate action tile for sniper tile
         """
 
@@ -115,11 +116,15 @@ class GameController:
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
         if tile_collided is not None:
-            if tile_collided.click_tile(event_list, self.view.displaysurf):
-                print('yo')
-                self.view.tiles_hand.remove(tile)
-                self.view.tiles_board.remove(tile_collided)
-                self.view.tiles_defausse.add(tile_collided)
+            next_player = next_element(self.players, player)
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile, next_player)
+            if  tile_collided_info == {} or tile_collided_info["kind"] == "base":
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tile)
+                    self.view.tiles_board.remove(tile_collided)
+                    self.view.tiles_defausse.add(tile_collided)
 
     def _start_game(self):
         """Initiate first turn for placing hq
