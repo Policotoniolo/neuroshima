@@ -299,6 +299,14 @@ class BoardZone():
             hexagone = Hexagone(position=position)
             self.hexagones.add(hexagone)
 
+    def get_hexagone_by_position(self, position: tuple) -> Hexagone|None:
+        try:
+            for hexagone in self.hexagones:
+                if hexagone.position == position:
+                    return hexagone
+        except StopIteration:
+            print("Any valide position")
+
     def collision(self, group: pygame.sprite.Group) -> None:
         """Check if hexagones collide with any sprite in the group
         Args:
@@ -317,6 +325,13 @@ class BoardZone():
         for hexagone in self.hexagones:
             hexagone.render(self.drawsurf, (0,255,0,50), (0,255,0,50), width=20)
         self.drawsurf.blit(border,(290,143))
+
+    def highlight_hexagones(self, positions_list: List) -> None:
+        for position in positions_list:
+            hexagone = self.get_hexagone_by_position(position)
+            if hexagone is not None:
+                hexagone.render(self.drawsurf, (0,255,0,50), (0,255,0,50), width=5)
+
 
     def highlight_non_empty(self, group: pygame.sprite.Group) -> None:
         """highlight hexgone on the board collinding with a sprit group
@@ -541,7 +556,10 @@ if __name__ == "__main__":
         view.display_screen()
         events_list = pygame.event.get()
         # pygame.draw.circle(view.displaysurf, (0,255,0), (491, 362), 10)
-        board.displaygreenboard()
+        board.highlight_hexagones([(302,241),
+                (301,326),
+                (301,411),
+                (377,198)])
 
         # pygame.draw.circle(view.displaysurf, (0,255,0), (491, 362), 10)
         view.displaysurf.blit(board.drawsurf, (0,0))
