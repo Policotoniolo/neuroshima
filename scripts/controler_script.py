@@ -8,7 +8,7 @@ from typing import Dict
 
 import pygame
 
-from model_script import Player, HexBoard
+from model_script import Player, HexBoard, Tile
 from view import View
 
 # pylint: disable=no-member
@@ -30,6 +30,7 @@ class GameController:
         self.players = []
         self.number_of_players = number_of_players
         self.board = HexBoard(BOARD_LIMIT,DELTAS)
+        self.all_tiles = []
         # View
         self.view = View()
         # Controller
@@ -65,14 +66,14 @@ class GameController:
         """
         return len(player.deck.tiles)
 
-    def get_info_from_id_tile(self, id_tile:str, player: Player) -> Dict :
+    def get_info_from_id_tile(self, id_tile:str) -> Dict :
         """retrieve informations of a tile model in a deck player from a id tile
 
         Args:
             id_tile (str): id tile
             player (Player): Instance of Player
         """
-        for tile in player.deck.all_tiles:
+        for tile in self.all_tiles:
             if tile.id_tile == id_tile:
                 return tile.__dict__
         return {}
@@ -131,6 +132,7 @@ class GameController:
         for player in self.players:
 
             player.deck.init_deck()
+            self.all_tiles.append(player.deck.tiles)
             player.get_tiles(1)
 
             id_tiles = self.get_id_tiles_from_hand(player)
