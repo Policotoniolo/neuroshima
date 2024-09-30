@@ -19,13 +19,13 @@ BOARD_PIXEL_TO_CUBE = {(302,241): (-2,0,2),
                 (451,241): (0,-1,1),
                 (451,327): (0,0,0),
                 (450,413): (0,1,-1),
-                (450,499): (0,2,-1),
+                (450,499): (0,2,-2),
                 (525,199): (1,-2,1),
                 (525,284): (1,-1,0),
                 (525,370): (1,0,-1),
                 (524,455): (1,1,-2),
                 (599,242): (2,-2,0),
-                (598,328): (2,-1,1),
+                (598,328): (2,-1,-1),
                 (598,413): (2,0,-2)
                 }
 BOARD_POSITION = {1:[(302,241), (-2,0,2)],
@@ -53,7 +53,7 @@ CUBE_DIRECTION_VECTORS =  [
     (-1, 0, +1), (-1, +1, 0), (0, +1, -1), 
 ] #Used for finding neighbors
 
-def coordinates_cube_to_pixel(cube_coordinates:tuple):
+def coordinates_cube_to_pixel(cube_coordinates:tuple) -> tuple:
     """Transform cube coordinates into pixel position
 
     Args:
@@ -62,10 +62,10 @@ def coordinates_cube_to_pixel(cube_coordinates:tuple):
     Returns:
         Tuple: Pixels posistion
     """
-    return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates]
+    return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates][0]
 
 
-def coordinates_pixel_to_cube(pixel_position:tuple):
+def coordinates_pixel_to_cube(pixel_position:tuple) -> tuple:
     """Transform pixels position into cube coordinates 
 
     Args:
@@ -101,3 +101,7 @@ def get_neighbors(cube_coordinates: tuple) -> list:
     neighbors = [tuple(map(sum, zip(x, cube_coordinates)))
                     for x in CUBE_DIRECTION_VECTORS]
     return neighbors
+
+def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[tuple]:
+    list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates]
+    return list_pixels_coordinates
