@@ -183,7 +183,6 @@ class Deck:
         self.tiles = []
         self.army_name = army_name
         self.defausse = []
-        self.all_tiles = []
 
 
     def _get_army(self) -> List[dict]:
@@ -231,7 +230,6 @@ class Deck:
                     action=dict_tile['action'],
                     url_image=dict_tile['url_image']
                 ))
-        self.all_tiles = self.tiles.copy()
 
     def remove_top_deck_tile(self) -> Tile|None:
         """Return the first tile from the deck and remove it.
