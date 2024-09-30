@@ -8,8 +8,9 @@ from typing import Dict
 
 import pygame
 
-from model_script import Player, HexBoard
+from model_script import Player, HexBoard, Tile
 from view import View
+from functions import coordinates_pixel_to_cube
 
 # pylint: disable=no-member
 
@@ -30,6 +31,7 @@ class GameController:
         self.players = []
         self.number_of_players = number_of_players
         self.board = HexBoard(BOARD_LIMIT,DELTAS)
+        self.all_tiles = []
         # View
         self.view = View()
         # Controller
@@ -65,23 +67,35 @@ class GameController:
         """
         return len(player.deck.tiles)
 
-    def get_info_from_id_tile(self, id_tile:str, player: Player) -> Dict :
+    def get_info_from_id_tile(self, id_tile:str) -> Dict :
         """retrieve informations of a tile model in a deck player from a id tile
 
         Args:
             id_tile (str): id tile
             player (Player): Instance of Player
         """
-        for tile in player.deck.all_tiles:
+        for tile in self.all_tiles:
             if tile.id_tile == id_tile:
                 return tile.__dict__
         return {}
+
+    def get_one_model_tile(self, id_tile) -> Tile|None:
+        """retrieve one tile model in a deck player from a id tile
+
+        Args:
+            id_tile (str): id tile
+            player (Player): Instance of Player
+        """
+        for tile in self.all_tiles:
+            if tile.id_tile == id_tile:
+                return tile
+
 
     def actiontile(self, player, event_list):
         """generate actions for using tile type action"""
 
         for tile in self.view.tiles_hand:
-            tile_informations = self.get_info_from_id_tile(tile.id_tile, player)
+            tile_informations = self.get_info_from_id_tile(tile.id_tile)
             if tile_informations['action'] == "movement":
                 self._movement_tile(tile)
             if tile_informations['action'] == "sniper":
@@ -131,6 +145,7 @@ class GameController:
         for player in self.players:
 
             player.deck.init_deck()
+            self.all_tiles = self.all_tiles + player.deck.tiles
             player.get_tiles(1)
 
             id_tiles = self.get_id_tiles_from_hand(player)
@@ -155,6 +170,7 @@ class GameController:
                     run = False
                     self.view.hand_tile_to_board()
                     player.discard_tiles_hand(id_tiles_to_keep=[])
+                    self.update_board_model()
 
             player.deck.shuffle_deck()
 
@@ -203,9 +219,9 @@ class GameController:
             index_tile_to_keep = self.view.get_tile_to_keep()    ##### CREER une fonction unique dans view ici
             index_tile_to_board = self.view.hand_tile_to_board() ##### CREER une fonction unique dans view ici
             for id_tile in index_tile_to_board:
-                self.board.add_tile_to_board(player.hand.get_tile_by_name(id_tile))
+                self.board.add_tile_to_board(player.hand.get_tile_by_id(id_tile))
             player.discard_tiles_hand(index_tile_to_keep)
-            
+            self.update_board_model()
             return True
 
     def end_turn(self, player: Player):
@@ -215,20 +231,24 @@ class GameController:
             player (Player): _description_
         """
 
+    def update_tile_model(self, id_tile, pixel_position, angle_index):
+        tilemodel = self.get_one_model_tile(id_tile)
+        self.board.add_tile_to_board(tilemodel)
+        cube_coordinates = coordinates_pixel_to_cube(pixel_position)
+        print(cube_coordinates)
+        if tilemodel is not None and cube_coordinates is not None:
+            tilemodel.rotational_direction = angle_index
+            tilemodel.board_position = cube_coordinates # type: ignore
+            print(tilemodel.board_position)
+
     def update_board_model(self):
         """Save actual board from view into the board model
         """
-
-        #### Save les modifications du board existant
-
-        #### Save les changement des tiles de la main
-
-        self.board.tiles = []
-        for tile in self.view.tiles_board:
-            # self.board.tiles.append(Tile())
-            return
-
-
+        for tileview in self.view.tiles_board:
+            id_tile = tileview.id_tile
+            pixel_position = tileview.rect.topleft
+            angle_index = tileview.angle_index
+            self.update_tile_model(id_tile, pixel_position, angle_index)
 
 
     def run(self):
