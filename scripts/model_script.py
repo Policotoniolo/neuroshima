@@ -264,7 +264,7 @@ class Hand:
         for tile in tiles:
             self.tiles.remove(tile)
 
-    def get_tile_by_name(self, id_tile : str) -> Tile|None:
+    def get_tile_by_id(self, id_tile : str) -> Tile|None:
         """get a tile from the hand according to the id tile
 
         Args:
