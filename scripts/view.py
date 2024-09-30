@@ -419,6 +419,7 @@ class View():
         for tile in self.tiles_hand:
             if pygame.sprite.collide_rect(tile, self.discardzone):
                 self.discardzone.tiles.add(tile)
+                self.tiles_hand.remove(tile)
                 indexes_discard.append(tile.id_tile)
 
     def get_tile_to_keep(self) -> List[int]:
