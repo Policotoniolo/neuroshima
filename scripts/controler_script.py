@@ -10,7 +10,7 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View
-from functions import next_element
+from functions import next_element, get_neighbors, list_cubes_to_pixel
 
 # pylint: disable=no-member
 
@@ -133,11 +133,15 @@ class GameController:
                     self.view.tiles_defausse.add(tile_collided)
 
     def _grenade_tile(self, tile, player, event_list):
+        """Generate action tile for grenade tile
+        """
         tile_collided = pygame.sprite.spritecollideany(tile,
                                                         self.view.tiles_board,
                                                         pygame.sprite.collide_rect_ratio(0.75))
+        n = get_neighbors(self.get_hq_tile_player(player).board_position)
+        p = list_cubes_to_pixel(n)
         if tile.drag.dragging:
-            self.view.boardzone.displaygreenboard()
+            self.view.boardzone.highlight_hexagones(p)
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
         if tile_collided is not None:
