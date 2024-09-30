@@ -1,6 +1,7 @@
 """docstring
 """
 import pygame
+from typing import List
 
 # pylint: disable = no-member
 # pylint: disable=c-extension-no-member
@@ -47,6 +48,10 @@ BOARD_POSITION = {1:[(302,241), (-2,0,2)],
 18:[(598,328), (2,-1,1)],
 19:[(598,413), (2,0,-2)]}
 
+CUBE_DIRECTION_VECTORS =  [
+    (+1, 0, -1), (+1, -1, 0), (0, -1, +1), 
+    (-1, 0, +1), (-1, +1, 0), (0, +1, -1), 
+] #Used for finding neighbors
 
 def coordinates_cube_to_pixel(cube_coordinates:tuple):
     """Transform cube coordinates into pixel position
@@ -83,3 +88,16 @@ def next_element(list, element):
     if idx >= len(list)-1:
         return list[0]
     return list[idx+1]
+
+def get_neighbors(cube_coordinates: tuple) -> list:
+    """get all neighbors of a cube coordinates position
+
+    Args:
+        cube_coordinates (tuple): initale ube coordinate to looking for
+
+    Returns:
+        list: List of cube coordinates neighbors
+    """
+    neighbors = [tuple(map(sum, zip(x, cube_coordinates)))
+                    for x in CUBE_DIRECTION_VECTORS]
+    return neighbors
