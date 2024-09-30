@@ -8,7 +8,7 @@ from typing import Dict
 
 import pygame
 
-from model_script import Player, HexBoard
+from model_script import Player, HexBoard, Tile
 from view import View
 from functions import next_element
 
@@ -65,6 +65,10 @@ class GameController:
             player (Player): Instance of Player
         """
         return len(player.deck.tiles)
+
+    def get_hq_tile_player(self, player: Player) -> Tile:
+        hq_tile = player.deck.all_tiles[0]
+        return hq_tile
 
     def get_info_from_id_tile(self, id_tile:str, player: Player) -> Dict :
         """retrieve informations of a tile model in a deck player from a id tile
@@ -253,9 +257,6 @@ class GameController:
         for tile in self.view.tiles_board:
             # self.board.tiles.append(Tile())
             return
-
-
-
 
     def run(self):
         """Script running the game"""
