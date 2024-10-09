@@ -67,7 +67,7 @@ def coordinates_cube_to_pixel(cube_coordinates:tuple):
     """
     try:
         return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates][0]
-    except ValueError:
+    except KeyError:
         print("cube coordinates not good!")
 
 
@@ -82,7 +82,7 @@ def coordinates_pixel_to_cube(pixel_position:tuple) -> tuple:
     """
     try:
         return BOARD_PIXEL_TO_CUBE[pixel_position]
-    except ValueError:
+    except KeyError:
         print("pixel position not good!")
     return BOARD_PIXEL_TO_CUBE[pixel_position]
 
