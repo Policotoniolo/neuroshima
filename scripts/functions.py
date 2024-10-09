@@ -113,5 +113,5 @@ def get_neighbors(cube_coordinates: tuple) -> list:
     return neighbors
 
 def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[Tuple[int, int]|None]:
-    list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates]
+    list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates if x in list(BOARD_PIXEL_TO_CUBE.values())]
     return list_pixels_coordinates
