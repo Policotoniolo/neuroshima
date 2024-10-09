@@ -2,7 +2,7 @@
 """
 import pygame
 
-from typing import Literal, List
+from typing import Tuple, List
 
 # pylint: disable = no-member
 # pylint: disable=c-extension-no-member
@@ -12,8 +12,8 @@ from typing import Literal, List
 BOARD_PIXEL_TO_CUBE = {(302,241): (-2,0,2),
                 (301,326): (-2,1,1),
                 (301,411): (-2,2,0),
-                (377,198): (-1,-1,0),
-                (376,284): (-1,0,-1),
+                (377,198): (-1,-1,2),
+                (376,284): (-1,0,1),
                 (376,369): (-1,1,0),
                 (376,455): (-1,2,-1,),
                 (451,155): (0,-2,2),
@@ -34,8 +34,8 @@ BOARD_PIXEL_TO_CUBE = {(302,241): (-2,0,2),
 BOARD_POSITION = {1:[(302,241), (-2,0,2)],
 2:[(301,326), (-2,1,1)],
 3:[(301,411), (-2,2,0)],
-4:[(377,198), (-1,-1,0)],
-5:[(376,284), (-1,0,-1)],
+4:[(377,198), (-1,-1,2)],
+5:[(376,284), (-1,0,1)],
 6:[(376,369), (-1,1,0)],
 7:[(376,455), (-1,2,-1,)],
 8:[(451,155), (0,-2,2)],
@@ -56,7 +56,7 @@ CUBE_DIRECTION_VECTORS =  [
     (-1, 0, +1), (-1, +1, 0), (0, +1, -1), 
 ] #Used for finding neighbors
 
-def coordinates_cube_to_pixel(cube_coordinates:tuple) -> tuple:
+def coordinates_cube_to_pixel(cube_coordinates:tuple):
     """Transform cube coordinates into pixel position
 
     Args:
@@ -66,7 +66,7 @@ def coordinates_cube_to_pixel(cube_coordinates:tuple) -> tuple:
         Tuple: Pixels posistion
     """
     try:
-        return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates]
+        return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates][0]
     except ValueError:
         print("cube coordinates not good!")
 
@@ -112,6 +112,6 @@ def get_neighbors(cube_coordinates: tuple) -> list:
                     for x in CUBE_DIRECTION_VECTORS]
     return neighbors
 
-def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[tuple]:
+def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[Tuple[int, int]|None]:
     list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates]
     return list_pixels_coordinates
