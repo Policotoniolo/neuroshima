@@ -208,11 +208,9 @@ class EndButton(pygame.sprite.Sprite):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
-                    print("Prochain joueur!")
                     return True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    print('Prochain joueur!')
                     return True
     def render(self):
         """display button"""
@@ -306,6 +304,19 @@ class BoardZone():
                     return hexagone
         except StopIteration:
             print("Any valide position")
+
+    def single_collision(self, sprite: pygame.sprite._SpriteSupportsGroup) -> bool:
+        """Test if a sprite collide with any hexagones on the board
+
+        Args:
+            sprite (pygame.sprite.Sprite): Sprite to check
+
+        Returns:
+            bool: Return True if Sprite collide with the board
+        """
+        if pygame.sprite.spritecollide(sprite, self.hexagones, False) is not None:
+            return True
+        return False
 
     def collision(self, group: pygame.sprite.Group) -> None:
         """Check if hexagones collide with any sprite in the group
