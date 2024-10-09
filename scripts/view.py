@@ -314,7 +314,7 @@ class BoardZone():
         Returns:
             bool: Return True if Sprite collide with the board
         """
-        if pygame.sprite.spritecollide(sprite, self.hexagones, False) is not None:
+        if pygame.sprite.spritecollide(sprite, self.hexagones, False) != []:
             return True
         return False
 
