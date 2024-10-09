@@ -100,7 +100,7 @@ class GameController:
         """generate actions for using tile type action"""
 
         for tileview in self.view.tiles_hand:
-            if tileview.drag.dragging == True:
+            if tileview.drag.dragging == True or self.view.boardzone.single_collision(tileview):
                 tile_informations = self.get_info_from_id_tile(tileview.id_tile)
                 if tile_informations['action'] == "movement":
                     self._movement_tile(tileview,player ,event_list)
