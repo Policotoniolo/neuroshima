@@ -332,12 +332,14 @@ class BoardZone():
     def displaygreenboard(self):
         """Display a green layer on all the board
         """
+        self.drawsurf.fill(pygame.Color('#00000000'))
         border = pygame.image.load("image/boardgreenboarder.png")
         for hexagone in self.hexagones:
             hexagone.render(self.drawsurf, (0,255,0,50), (0,255,0,50), width=20)
         self.drawsurf.blit(border,(290,143))
 
     def highlight_hexagones(self, positions_list: List) -> None:
+        self.drawsurf.fill(pygame.Color('#00000000'))
         for position in positions_list:
             hexagone = self.get_hexagone_by_position(position)
             if hexagone is not None:
