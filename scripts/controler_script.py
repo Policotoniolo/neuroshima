@@ -112,21 +112,28 @@ class GameController:
                     self._battle_tile(tileview, event_list)
                 pygame.display.flip()
 
-    def _movement_tile(self, tileview):
+    def _movement_tile(self, tileview,player ,event_list):
         """generate action tile of movement
         """
         if tileview.drag.dragging:
             self.view.boardzone.displaygreenboard()
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
-        elif not tileview.drag.dragging :
-            tile_collided = pygame.sprite.spritecollideany(tileview,
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-            if tile_collided is not None:
-                self.view.tiles_hand.remove(tileview)
-                self.view.tiles_board.remove(tile_collided)
-                self.view.tiles_board_moving.add(tile_collided)
+        # elif not tileview.drag.dragging :
+        tile_collided = pygame.sprite.spritecollideany(tileview,
+                                                    self.view.tiles_board,
+                                                    pygame.sprite.collide_rect_ratio(0.75))
+        if tile_collided is not None:
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile)
+            if  (tile_collided_info == {} or 
+                    tile_collided_info['army_name'] != player.deck.army_name
+                    ):
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tileview)
+                    self.view.tiles_board.remove(tile_collided)
+                    self.view.tiles_board_moving.add(tile_collided)
 
     def _sniper_tile(self, tileview, event_list):
         """Generate action tile for sniper tile
