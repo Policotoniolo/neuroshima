@@ -67,9 +67,10 @@ class GameController:
         """
         return len(player.deck.tiles)
 
-    def get_hq_tile_player(self, player: Player) -> Tile:
-        hq_tile = player.deck.all_tiles[0]
-        return hq_tile
+    def get_hq_tile_player(self, player: Player) -> Tile|None:
+        hq_tile = self.get_one_model_tile(player.deck.army_name+"-qg")
+        if hq_tile is not None:
+            return hq_tile
 
     def get_info_from_id_tile(self, id_tile:str) -> Dict :
         """retrieve informations of a tile model in a deck player from a id tile
