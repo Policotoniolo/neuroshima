@@ -100,16 +100,17 @@ class GameController:
         """generate actions for using tile type action"""
 
         for tileview in self.view.tiles_hand:
-            tile_informations = self.get_info_from_id_tile(tileview.id_tile)
-            if tile_informations['action'] == "movement":
-                self._movement_tile(tileview)
-            if tile_informations['action'] == "sniper":
-                self._sniper_tile(tileview, event_list)
-            if tile_informations['action'] == "grenade":
-                self._grenade_tile(tileview, player, event_list)
-            if tile_informations['action'] == "battle":
-                self._battle_tile(tileview, event_list)
-            pygame.display.flip()
+            if tileview.drag.dragging == True:
+                tile_informations = self.get_info_from_id_tile(tileview.id_tile)
+                if tile_informations['action'] == "movement":
+                    self._movement_tile(tileview,player ,event_list)
+                if tile_informations['action'] == "sniper":
+                    self._sniper_tile(tileview, event_list)
+                if tile_informations['action'] == "grenade":
+                    self._grenade_tile(tileview, player, event_list)
+                if tile_informations['action'] == "battle":
+                    self._battle_tile(tileview, event_list)
+                pygame.display.flip()
 
     def _movement_tile(self, tileview):
         """generate action tile of movement
