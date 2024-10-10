@@ -27,7 +27,7 @@ class GameController:
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
         self.cfg = [{'name':'paul', 'army':'outpost'},
-                    {'name':'benoit', 'army':'borgo'}]
+                    {'name':'benoit', 'army':'moloch'}]
         self.players = []
         self.number_of_players = number_of_players
         self.board = HexBoard(BOARD_LIMIT,DELTAS)
