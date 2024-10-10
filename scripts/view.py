@@ -343,7 +343,7 @@ class BoardZone():
         for position in positions_list:
             hexagone = self.get_hexagone_by_position(position)
             if hexagone is not None:
-                hexagone.render(self.drawsurf, (0,255,0,50), (0,255,0,50), width=5)
+                hexagone.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
 
 
     def highlight_non_empty(self, group: pygame.sprite.Group) -> None:
