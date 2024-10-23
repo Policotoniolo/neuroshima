@@ -159,6 +159,8 @@ class Hexagone(pygame.sprite.Sprite):
         self.collide = False
         self.vertices = self._compute_vertice()
 
+        self.button = Button(self.rect.topleft)
+
     def minimal_radius(self) -> float:
         """Horizontal length of the hexagon"""
         # https://en.wikipedia.org/wiki/Hexagon#Parameters
@@ -181,6 +183,12 @@ class Hexagone(pygame.sprite.Sprite):
         """Renders the hexagon on the screen"""
         pygame.draw.polygon(drawsurf, colour, self.vertices)
         pygame.draw.polygon(drawsurf, colour_highlight, self.vertices, width)
+
+    def click_button(self, event_list, surface):
+        """prompt button on tile"""
+        self.button.enable = True
+        self.button.render(surface)
+        return self.button.isvalidated(event_list)
 
 class EndButton(pygame.sprite.Sprite):
     """end button turn sprite
@@ -345,6 +353,14 @@ class BoardZone():
             if hexagone is not None:
                 hexagone.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
 
+    def highlight_and_click_hexagones(self, positions_list: List, event_list):
+        self.drawsurf.fill(pygame.Color('#00000000'))
+        for position in positions_list:
+            hexagone = self.get_hexagone_by_position(position)
+            if hexagone is not None:
+                hexagone.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
+                if hexagone.click_button(event_list, self.drawsurf):
+                    return hexagone
 
     def highlight_non_empty(self, group: pygame.sprite.Group) -> None:
         """highlight hexgone on the board collinding with a sprit group
@@ -390,6 +406,7 @@ class Button(pygame.sprite.Sprite):
                 if self.rect.collidepoint(event.pos):
                     self.enable = False
                     return True
+
     def render(self, surface):
         """display button
         Args:
@@ -397,7 +414,7 @@ class Button(pygame.sprite.Sprite):
         """
         if self.enable:
             surface.blit(self.image, self.rect)
-            pygame.display.flip()
+            # pygame.display.flip()
 
 class View():
     """class for prompting board and tiles
