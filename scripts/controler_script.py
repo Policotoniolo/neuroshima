@@ -390,6 +390,23 @@ class GameController:
             angle_index = tileview.angle_index
             self.update_tile_model(id_tile, pixel_position, angle_index)
 
+    def update_board_view_from_hand(self):
+        """Update the board model while moving tileview from hand
+        """
+        for tileview in self.view.tiles_hand:
+            tileviewinfo = self.get_info_from_id_tile(tileview.id_tile)
+            if tileviewinfo["kind"] in ["unite", "module"]:
+                if pygame.sprite.spritecollideany(
+                    tileview, 
+                    self.view.boardzone.hexagones
+                ) is not None:
+                    self.view.tiles_board.add(tileview)
+                    if tileview.rect.topleft in list(BOARD_PIXEL_TO_CUBE.keys()):
+                        self.update_tile_model(tileview.id_tile, tileview.rect.topleft, tileview.angle_index)
+                else:
+                    self.view.tiles_board.remove(tileview)
+                    self.board.remove_tile_from_board(tileview.id_tile)
+
 
     def run(self):
         """Script running the game"""
