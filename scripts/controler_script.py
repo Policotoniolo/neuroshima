@@ -253,9 +253,45 @@ class GameController:
                     self.view.tiles_board.remove(enemy_tileview)
                     self.view.tiles_board_moving.add(enemy_tileview)
 
+    def _airstrike_tile(self, tileview: TileView, event_list):
+        """Generate action for airstrike tile
 
-    def _explosion_tile(self, tileview):
-        return
+        Args:
+            tileview (TileView): TileView object
+            event_list (_type_): pygame events list
+        """
+        inner_board_positions = [
+    (376,284),(376,369),(451,241),(451,327),(450,413),(525,370),(525,284)
+        ]
+        inner_hexagones_board = self.view.boardzone.get_multiple_hexa(
+            inner_board_positions
+            )
+        hexagone_collided = pygame.sprite.spritecollideany(
+            tileview, # type: ignore
+            inner_hexagones_board # type: ignore
+        ) 
+        if tileview.drag.dragging:
+            self.view.boardzone.highlight_hexagones(inner_board_positions)
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+        elif not tileview.drag.dragging:
+            self.view.boardzone.drawsurf.fill((pygame.Color('#00000000')))
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if hexagone_collided is not None:
+            self.view.boardzone.highlight_neighbors_hexagone(hexagone_collided, "red")
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+            if tileview.click_tile(event_list, self.view.displaysurf):
+                self.view.tiles_hand.remove(tileview)
+                hexagone_damaged = self.view.boardzone.get_neighbors_hexagone(
+                    hexagone_collided
+                    )
+                for tile in self.view.tiles_board:
+                    if (pygame.sprite.spritecollideany(
+                        tile, 
+                        hexagone_damaged) is not None # type: ignore
+                        and tile.id_tile.split('-')[1] != "qg"):
+                        self.single_damage(tile)
 
     def launch_battle(self):
         print("BATTLE !")
