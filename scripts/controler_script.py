@@ -10,7 +10,7 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View, TileView
-from functions import coordinates_pixel_to_cube, next_element, get_neighbors, list_cubes_to_pixel
+from functions import coordinates_pixel_to_cube, next_element, get_neighbors, list_cubes_to_pixel, BOARD_PIXEL_TO_CUBE
 
 # pylint: disable=no-member
 
@@ -26,11 +26,11 @@ class GameController:
 
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
-        self.cfg = [{'name':'paul', 'army':'outpost'},
+        self.cfg = [{'name':'paul', 'army':'borgo'},
                     {'name':'benoit', 'army':'moloch'}]
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['outpost', 'moloch'])
+        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'moloch'])
         self.all_tiles = []
         # View
         self.view = View()
@@ -113,9 +113,8 @@ class GameController:
                     self._battle_tile(tileview)
                 elif tile_informations['action'] == "push":
                     self._push_tile(tileview, event_list)
-                elif tile_informations['action'] == "explosion":
-                    self._explosion_tile(tileview)
-                # pygame.display.flip()
+                elif tile_informations['action'] == "airstrike":
+                    self._airstrike_tile(tileview, event_list)
 
     def _movement_tile(self, tileview, player, event_list):
         """generate action tile of movement
@@ -141,6 +140,7 @@ class GameController:
             else:
                 if tile_collided.click_tile(event_list, self.view.displaysurf):
                     self.view.tiles_hand.remove(tileview)
+                    self.view.tiles_board.remove(tileview)
                     self.view.tiles_board.remove(tile_collided)
                     self.view.tiles_board_moving.add(tile_collided)
 
@@ -206,6 +206,11 @@ class GameController:
                     self.single_damage(tile_collided)
 
     def _battle_tile(self, tileview: TileView):
+        """Generate action for battle tile
+
+        Args:
+            tileview (TileView): TileView object
+        """
         if tileview.drag.dragging:
             self.view.boardzone.displaygreenboard()
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
@@ -215,7 +220,12 @@ class GameController:
                 self.launch_battle()
 
     def _push_tile(self, tileview: TileView, event_list):
+        """Generate action for push tile
 
+        Args:
+            tileview (TileView): TileView object
+            event_list (_type_): pygame events list
+        """
         tile_collided = pygame.sprite.spritecollideany(
             tileview, # type: ignore
             self.view.tiles_board,
@@ -375,16 +385,18 @@ class GameController:
         Args:
             player (Player): Instance of Player Class
         """
+
         self.view.display_screen()
 
         self.view.move_tile_hand(event_list)
         self.view.move_tile_board(event_list)
-
+        self.update_board_view_from_hand()
 
         self.view.generate_all_sprite_group()
         self.view.display_all_sprite()
 
         self.actiontile(player, event_list)
+
         pygame.display.flip()
 
         if self.view.endbutton.isvalidated(event_list):
@@ -399,14 +411,14 @@ class GameController:
             self.update_board_model()
             return True
 
-    def end_turn(self, player: Player):
-        """_summary_
+    def update_tile_model(self, id_tile: str, pixel_position: tuple, angle_index: int) -> None:
+        """Update a tile on the baord model
 
         Args:
-            player (Player): _description_
+            id_tile (str): id of the tile
+            pixel_position (tuple): Pixel position on the screen
+            angle_index (int): Index of the angle of the tile
         """
-
-    def update_tile_model(self, id_tile, pixel_position, angle_index):
         tilemodel = self.get_one_model_tile(id_tile)
         self.board.add_tile_to_board(tilemodel)
         cube_coordinates = coordinates_pixel_to_cube(pixel_position)
@@ -473,17 +485,10 @@ class GameController:
                         sys.exit()
 
                 if self.player_turn(player, event_list):
-                    self.end_turn(player)
                     round_iteration +=1
                     run = False
 
 
-
 if __name__ == "__main__":
     game = GameController()
-    # # for elt in game.cfg:
-    # #     game._add_player(elt["name"], elt['army'])
-    # # game.players[0].deck.init_deck()
-    # # print(game.get_info_from_id_tile('outpost-mouvement1', game.players[0])['kind'])
     game.run()
-    # print(sys.path)
