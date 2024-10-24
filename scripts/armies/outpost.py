@@ -1,4 +1,4 @@
-"""Module providing all tile of the green army"""
+"""Module providing all tiles of the green army"""
 
 outpost=[{"kind": "base",
             "army_name":"outpost",
@@ -556,9 +556,3 @@ outpost=[{"kind": "base",
             "action":"sniper",
             "url_image":"image/armies/outpost-sniper.png"}
         ]
-
-def test():
-    return outpost
-
-if __name__ == "__main__":
-    print(test())

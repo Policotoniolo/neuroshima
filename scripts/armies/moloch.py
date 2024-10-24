@@ -1,4 +1,4 @@
-"""Module providing all tile of the moloch army"""
+"""Module providing all tiles of the moloch army"""
 moloch=[{"kind": "base",
             "army_name":"moloch",
             "id_tile":"moloch-qg",
@@ -542,4 +542,5 @@ moloch=[{"kind": "base",
             "special_capacities":None,
             "module":None,
             "action":"push",
-            "url_image":"image/armies/moloch-poussee.png"}]
+            "url_image":"image/armies/moloch-poussee.png"}
+]
