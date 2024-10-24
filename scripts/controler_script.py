@@ -260,6 +260,20 @@ class GameController:
     def launch_battle(self):
         print("BATTLE !")
         return
+
+    def single_damage(self, tileview: TileView) -> None:
+        """generate one damage on a tileview and update model. Use for action tile
+
+        Args:
+            tileview (TileView): Tileview to damage
+        """
+        tilemodel = self.get_one_model_tile(tileview.id_tile)
+        if tilemodel is not None and tilemodel.life_point is not None:
+            tilemodel.life_point = tilemodel.life_point-1
+            if tilemodel.life_point <= 0:
+                self.view.tiles_board.remove(tileview)
+                self.board.remove_tile_from_board(tileview.id_tile)
+
     def _start_game(self):
         """Initiate first turn for placing hq
         """
