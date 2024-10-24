@@ -176,8 +176,9 @@ class GameController:
             else:
                 if tile_collided.click_tile(event_list, self.view.displaysurf):
                     self.view.tiles_hand.remove(tileview)
-                    self.view.tiles_board.remove(tile_collided)
-                    self.view.tiles_defausse.add(tile_collided)
+                    self.view.tiles_board.remove(tileview)
+                    self.single_damage(tile_collided)
+
 
     def _grenade_tile(self, tileview: TileView, player, event_list):
         """Generate action tile for grenade tile
@@ -202,8 +203,7 @@ class GameController:
             else:
                 if tile_collided.click_tile(event_list, self.view.displaysurf):
                     self.view.tiles_hand.remove(tileview)
-                    self.view.tiles_board.remove(tile_collided)
-                    self.view.tiles_defausse.add(tile_collided)
+                    self.single_damage(tile_collided)
 
     def _battle_tile(self, tileview: TileView):
         if tileview.drag.dragging:
