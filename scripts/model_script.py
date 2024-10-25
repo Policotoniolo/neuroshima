@@ -68,6 +68,7 @@ class Tile:
         self.rotational_direction = 0
         self.module = module
         self.action = action
+        self.is_netted = False
         self.url_image = url_image
 
     def _coordinates_positive_rotation(self,coordinnates: tuple[int, int, int]
