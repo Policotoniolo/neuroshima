@@ -31,3 +31,9 @@ board_position = {1:[(302,241), (-2,0,2)],
 17:[(599,242), (2,-2,0)],
 18:[(598,328), (2,-1,-1)],
 19:[(598,413), (2,0,-2)]}
+
+
+NOTE BUG à corriger : 
+
+Affichage : movement tile ne met pas à jour le boardmodel en live. Si deuxiement tile mvt alors la mise en couleur ne bouge pas la première
+
