@@ -95,6 +95,16 @@ class GameController:
             if tile.id_tile == id_tile:
                 return tile
 
+    def get_one_view_tile(self, id_tile) -> TileView|None:
+        """retrieve one tile view if the tile is on the board model and boardview
+
+        Args:
+            id_tiles (_type_): id_tile
+        """
+        for tileview in self.view.tiles_board:
+            if tileview.id_tile == id_tile:
+                return tileview
+
     def actiontile(self, player, event_list):
         """generate actions for using tile type action"""
 
