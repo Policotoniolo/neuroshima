@@ -44,7 +44,7 @@ class Tile:
                 range_attacks_power: List[int]|None,
                 cac_attacks_direction: List[tuple]|None,
                 cac_attacks_power: List[int]|None,
-                net: List[int]|None,
+                net: List[tuple]|None,
                 life_point: int|None,
                 shields_position: List[tuple]|None,
                 special_capacities: List[str]|None,
@@ -164,6 +164,27 @@ class Tile:
                             )
                 self.cac_attacks_direction = new_cac_attacks_direction
 
+    def _rotate_net(self, new_rotation_direction: int):
+        """Rotate net directions of a tile base on a new rotate direction.
+
+        Args:
+            new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
+        """
+        rotation_diff = new_rotation_direction - self.rotational_direction
+        if rotation_diff == 0:
+            return
+
+        for _ in range(abs(rotation_diff)):
+            if self.net is not None:
+                new_net_posistion = []
+
+                for net in self.net:
+                    if rotation_diff > 0:
+                        new_net_posistion.append(self._coordinates_positive_rotation(net))
+                    else:
+                        new_net_posistion.append(self._coordinates_negative_rotation(net))
+                self.net = new_net_posistion
+
     def rotate_tile(self, new_rotation_direction: int) -> None:
         """generate all the rotation (attacks, shields) of a tile
 
@@ -173,6 +194,7 @@ class Tile:
 
         self._rotate_attacks(new_rotation_direction)
         self._rotate_shield(new_rotation_direction)
+        self._rotate_net(new_rotation_direction)
 
         self.rotational_direction = new_rotation_direction
 
