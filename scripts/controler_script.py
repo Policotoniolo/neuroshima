@@ -10,7 +10,7 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View, TileView
-from functions import coordinates_pixel_to_cube, next_element, get_neighbors, list_cubes_to_pixel, BOARD_PIXEL_TO_CUBE
+from functions import *
 
 # pylint: disable=no-member
 
