@@ -125,7 +125,7 @@ class TileView(pygame.sprite.Sprite):
                         for position in POSITION_LIST
                     ]
         index_min = min(range(len(pos_relative)), key=pos_relative.__getitem__)
-        if pos_relative[index_min] < 150:
+        if pos_relative[index_min] < 750:
             self.rect.topleft = POSITION_LIST[index_min]
             self.button.rect.topleft = self.rect.topleft
 
@@ -219,7 +219,7 @@ class EndButton(pygame.sprite.Sprite):
                 if self.rect.collidepoint(event.pos):
                     return True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     return True
     def render(self):
         """display button"""
@@ -232,7 +232,7 @@ class DiscardZone(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load("image/discardzone.png")
         self.rect = self.image.get_rect()
-        self.rect.topleft = (745, 300)
+        self.rect.topleft = (150, 150)
         self.surface = surface
         self.tiles = pygame.sprite.Group()
 
@@ -390,6 +390,7 @@ class BoardZone():
         Args:
             group (pygame.sprite.Group): Sprite groupe to checke
         """
+        self.drawsurf.fill(pygame.Color('#00000000'))
         for hexagone in self.hexagones:
             if pygame.sprite.spritecollideany(hexagone, group):
                 hexagone.render(self.drawsurf, self.green, self.green_highlight, width=5)
@@ -406,7 +407,6 @@ class BoardZone():
         for hexagone in self.hexagones:
             if not hexagone.collide:
                 hexagone.render(self.drawsurf, self.green, self.green_highlight, width=5)
-        # self.drawsurf.blit
 
 class Button(pygame.sprite.Sprite):
     """Simple button sprite

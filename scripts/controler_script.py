@@ -10,7 +10,7 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View, TileView
-from functions import coordinates_pixel_to_cube, next_element, get_neighbors, list_cubes_to_pixel, BOARD_PIXEL_TO_CUBE
+from functions import *
 
 # pylint: disable=no-member
 
@@ -27,10 +27,10 @@ class GameController:
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
         self.cfg = [{'name':'paul', 'army':'borgo'},
-                    {'name':'benoit', 'army':'moloch'}]
+                    {'name':'benoit', 'army':'outpost'}]
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'moloch'])
+        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'outpost'])
         self.all_tiles = []
         # View
         self.view = View()
@@ -89,11 +89,20 @@ class GameController:
 
         Args:
             id_tile (str): id tile
-            player (Player): Instance of Player
         """
         for tile in self.all_tiles:
             if tile.id_tile == id_tile:
                 return tile
+
+    def get_one_view_tile(self, id_tile) -> TileView|None:
+        """retrieve one tile view if the tile is on the board model and boardview
+
+        Args:
+            id_tiles (_type_): id_tile
+        """
+        for tileview in self.view.tiles_board:
+            if tileview.id_tile == id_tile:
+                return tileview
 
     def actiontile(self, player, event_list):
         """generate actions for using tile type action"""
@@ -178,7 +187,6 @@ class GameController:
                     self.view.tiles_hand.remove(tileview)
                     self.view.tiles_board.remove(tileview)
                     self.single_damage(tile_collided)
-
 
     def _grenade_tile(self, tileview: TileView, player, event_list):
         """Generate action tile for grenade tile
@@ -387,7 +395,8 @@ class GameController:
         """
 
         self.view.display_screen()
-
+        
+        self.update_unite_with_movement(player)
         self.view.move_tile_hand(event_list)
         self.view.move_tile_board(event_list)
         self.update_board_view_from_hand()
@@ -437,6 +446,14 @@ class GameController:
             pixel_position = tileview.rect.topleft
             angle_index = tileview.angle_index
             self.update_tile_model(id_tile, pixel_position, angle_index)
+
+    def update_unite_with_movement(self, player: Player):
+        for tilemodel in self.board.tiles[player.deck.army_name]:
+            if (tilemodel.special_capacities is not None and
+            "movement" in tilemodel.special_capacities):
+                tileview = self.get_one_view_tile(tilemodel.id_tile)
+                if tileview not in self.view.tiles_hand:
+                    self.view.tiles_board_moving.add(tileview)
 
     def update_board_view_from_hand(self):
         """Update the board model while moving tileview from hand
