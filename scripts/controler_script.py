@@ -418,6 +418,7 @@ class GameController:
                 self.board.add_tile_to_board(player.hand.get_tile_by_id(id_tile))
             player.discard_tiles_hand(index_tile_to_keep)
             self.update_board_model()
+            self.update_netted_unite(player)
             return True
 
     def update_tile_model(self, id_tile: str, pixel_position: tuple, angle_index: int) -> None:
@@ -433,8 +434,10 @@ class GameController:
         cube_coordinates = coordinates_pixel_to_cube(pixel_position)
         if tilemodel is not None and cube_coordinates is not None:
             old_board_position = tilemodel.board_position
-            tilemodel.rotational_direction = angle_index
+
             tilemodel.board_position = cube_coordinates # type: ignore
+            tilemodel.rotate_tile(angle_index)
+
             self.board.occupied[tilemodel.army_name].append(cube_coordinates)
             self.board.occupied[tilemodel.army_name].remove(old_board_position)
 
@@ -446,6 +449,27 @@ class GameController:
             pixel_position = tileview.rect.topleft
             angle_index = tileview.angle_index
             self.update_tile_model(id_tile, pixel_position, angle_index)
+
+    def update_netted_unite(self, player: Player):
+
+        for tilemodel in self.board.tiles[player.deck.army_name]:
+            if tilemodel.net is not None:
+                for net_directions in tilemodel.net:
+                    netted_positions = tuple(map(sum, 
+                                                    zip(net_directions, 
+                                                        tilemodel.board_position
+                                                        )
+                                                    )
+                                            )
+                    if netted_positions in self.board.occupied[
+                        next_element(self.board.armies, player.deck.army_name)]:
+
+                        index = self.board.occupied[
+                        next_element(self.board.armies, player.deck.army_name)].index(netted_positions)
+                        enemy_tile = self.board.tiles[
+                        next_element(self.board.armies, player.deck.army_name)][index]
+                        enemy_tile.is_netted = True
+        
 
     def update_unite_with_movement(self, player: Player):
         for tilemodel in self.board.tiles[player.deck.army_name]:
