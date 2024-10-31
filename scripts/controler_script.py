@@ -26,8 +26,8 @@ class GameController:
 
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
-        self.cfg = [{'name':'paul', 'army':'borgo'},
-                    {'name':'benoit', 'army':'outpost'}]
+        self.cfg = [{'name':'paul', 'army':'borgo'}, 
+                    {'name':'benoit', 'army':'outpost'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
         self.players = []
         self.number_of_players = number_of_players
         self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'outpost'])
@@ -35,8 +35,7 @@ class GameController:
         # View
         self.view = View()
         # Controller
-        # self.game_evaluator = game_evaluator
-        self.turn_time = turn_time
+        self.turn_time = turn_time #Pas encore utilisé, permettra de mettre un temps max par tour
 
     def _add_player(self, name, army_name):
         self.players.append(Player(name, army_name))
