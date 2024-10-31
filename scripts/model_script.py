@@ -183,7 +183,6 @@ class Deck:
         self.tiles = []
         self.army_name = army_name
         self.defausse = []
-        self.all_tiles = []
 
 
     def _get_army(self) -> List[dict]:
@@ -231,7 +230,6 @@ class Deck:
                     action=dict_tile['action'],
                     url_image=dict_tile['url_image']
                 ))
-        self.all_tiles = self.tiles.copy()
 
     def remove_top_deck_tile(self) -> Tile|None:
         """Return the first tile from the deck and remove it.
@@ -264,7 +262,7 @@ class Hand:
         for tile in tiles:
             self.tiles.remove(tile)
 
-    def get_tile_by_name(self, id_tile : str) -> Tile|None:
+    def get_tile_by_id(self, id_tile : str) -> Tile|None:
         """get a tile from the hand according to the id tile
 
         Args:
@@ -319,12 +317,13 @@ class Player:
 class HexBoard():
     """Describe the model Board
     """
-    def __init__(self, board_limit: int, deltas: list[list[int]]) -> None:
+    def __init__(self, board_limit: int, deltas: list[list[int]], armies: List[str]) -> None:
         self.board_limit = board_limit
         self.deltas = deltas
-        self.tiles = []
+        self.armies = armies
+        self.tiles = {armies[0]:[], armies[1]:[]}
         self.hexes = []
-        self.occupied = {}
+        self.occupied = {armies[0]:[], armies[1]:[]}
 
 
     def add_tile_to_board(self, tile: Tile|None):
@@ -335,8 +334,11 @@ class HexBoard():
         """
         if tile is None:
             return
-        self.occupied[tile.board_position] = True
-        self.tiles.append(tile)
+        army = tile.army_name
+        if tile in self.tiles[army]:
+            return
+        self.occupied[army].append(tile.board_position)
+        self.tiles[army].append(tile)
 
     def remove_tile_from_board(self, id_tile: str):
         """remove a tile from the board
@@ -344,17 +346,22 @@ class HexBoard():
         Args:
             id_tile (int): id of the tile
         """
-        for index, tile in enumerate(self.tiles):
+        for index, tile in enumerate(self.tiles[self.armies[0]]):
             if tile.id_tile == id_tile:
-                self.occupied[self.tiles[index].board_position] = False
-                self.tiles.pop(index)
+                self.occupied[self.armies[0]].remove(tile.board_position)
+                self.tiles[self.armies[0]].pop(index)
+                return
+        for index, tile in enumerate(self.tiles[self.armies[1]]):
+            if tile.id_tile == id_tile:
+                self.occupied[self.armies[1]].remove(tile.board_position)
+                self.tiles[self.armies[1]].pop(index)
+                return
 
 
     def create_board(self):
         """Create the hexa board
         """
         self.hexes = []
-        self.occupied = {}
         index = 0
 
         for r in range(self.board_limit):
@@ -363,7 +370,6 @@ class HexBoard():
             z = +r
 
             self.hexes.append((x,y,z))
-            self.occupied[(x,y,z)] = False
             index += 1
 
             for j in range(6):
@@ -377,7 +383,6 @@ class HexBoard():
                     z = z+self.deltas[j][2]
 
                     self.hexes.append((x,y,z))
-                    self.occupied[(x,y,z)] = False
                     index += 1
 
         self.hexes = tuple(self.hexes)

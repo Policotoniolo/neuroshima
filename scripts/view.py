@@ -125,7 +125,7 @@ class TileView(pygame.sprite.Sprite):
                         for position in POSITION_LIST
                     ]
         index_min = min(range(len(pos_relative)), key=pos_relative.__getitem__)
-        if pos_relative[index_min] < 150:
+        if pos_relative[index_min] < 750:
             self.rect.topleft = POSITION_LIST[index_min]
             self.button.rect.topleft = self.rect.topleft
 
@@ -154,33 +154,42 @@ class Hexagone(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.position = position
         self.rect.topleft = (position[0]+15, position[1]+10)
+        self.radius = 50
 
-        self.radius = 42
+        self.radius_hexa = 42
         self.collide = False
         self.vertices = self._compute_vertice()
+
+        self.button = Button(self.rect.topleft)
 
     def minimal_radius(self) -> float:
         """Horizontal length of the hexagon"""
         # https://en.wikipedia.org/wiki/Hexagon#Parameters
-        return self.radius * math.cos(math.radians(30))
+        return self.radius_hexa* math.cos(math.radians(30))
 
     def _compute_vertice(self):
         x, y = self.position[0] + 19, self.position[1]
-        half_radius = self.radius / 2
+        half_radius = self.radius_hexa/ 2
         minimal_radius = self.minimal_radius()
         return [
             (x, y),
             (x - half_radius, y + minimal_radius),
             (x, y + 2 * minimal_radius),
-            (x + self.radius, y + 2 * minimal_radius),
+            (x + self.radius_hexa, y + 2 * minimal_radius),
             (x + 3 * half_radius, y + minimal_radius),
-            (x + self.radius, y),
+            (x + self.radius_hexa, y),
         ]
 
     def render(self, drawsurf, colour, colour_highlight, width) -> None:
         """Renders the hexagon on the screen"""
         pygame.draw.polygon(drawsurf, colour, self.vertices)
         pygame.draw.polygon(drawsurf, colour_highlight, self.vertices, width)
+
+    def click_button(self, event_list, surface):
+        """prompt button on tile"""
+        self.button.enable = True
+        self.button.render(surface)
+        return self.button.isvalidated(event_list)
 
 class EndButton(pygame.sprite.Sprite):
     """end button turn sprite
@@ -208,11 +217,9 @@ class EndButton(pygame.sprite.Sprite):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
-                    print("Prochain joueur!")
                     return True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    print('Prochain joueur!')
+                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     return True
     def render(self):
         """display button"""
@@ -225,7 +232,7 @@ class DiscardZone(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load("image/discardzone.png")
         self.rect = self.image.get_rect()
-        self.rect.topleft = (745, 300)
+        self.rect.topleft = (150, 150)
         self.surface = surface
         self.tiles = pygame.sprite.Group()
 
@@ -299,6 +306,33 @@ class BoardZone():
             hexagone = Hexagone(position=position)
             self.hexagones.add(hexagone)
 
+    def get_hexagone_by_position(self, position: tuple) -> Hexagone|None:
+        try:
+            for hexagone in self.hexagones:
+                if hexagone.position == position:
+                    return hexagone
+        except StopIteration:
+            print("Any valide position")
+
+    def get_multiple_hexa(self, positions: List[tuple]) -> List[Hexagone]:
+        hexagones = []
+        for position in positions:
+            hexagones.append(self.get_hexagone_by_position(position))
+        return hexagones
+
+    def single_collision(self, sprite: pygame.sprite._SpriteSupportsGroup) -> bool:
+        """Test if a sprite collide with any hexagones on the board
+
+        Args:
+            sprite (pygame.sprite.Sprite): Sprite to check
+
+        Returns:
+            bool: Return True if Sprite collide with the board
+        """
+        if pygame.sprite.spritecollide(sprite, self.hexagones, False) != []:
+            return True
+        return False
+
     def collision(self, group: pygame.sprite.Group) -> None:
         """Check if hexagones collide with any sprite in the group
         Args:
@@ -313,10 +347,42 @@ class BoardZone():
     def displaygreenboard(self):
         """Display a green layer on all the board
         """
+        self.drawsurf.fill(pygame.Color('#00000000'))
         border = pygame.image.load("image/boardgreenboarder.png")
         for hexagone in self.hexagones:
             hexagone.render(self.drawsurf, (0,255,0,50), (0,255,0,50), width=20)
         self.drawsurf.blit(border,(290,143))
+
+    def highlight_hexagones(self, positions_list: List) -> None:
+        self.drawsurf.fill(pygame.Color('#00000000'))
+        for position in positions_list:
+            hexagone = self.get_hexagone_by_position(position)
+            if hexagone is not None:
+                hexagone.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
+
+    def highlight_and_click_hexagones(self, positions_list: List, event_list):
+        self.drawsurf.fill(pygame.Color('#00000000'))
+        for position in positions_list:
+            hexagone = self.get_hexagone_by_position(position)
+            if hexagone is not None:
+                hexagone.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
+                if hexagone.click_button(event_list, self.drawsurf):
+                    return hexagone
+
+    def get_neighbors_hexagone(self, hexagone):
+        hexagones_collided = []
+        for hex in self.hexagones:
+            if pygame.sprite.collide_circle(hexagone, hex):
+                hexagones_collided.append(hex)
+        return hexagones_collided
+
+    def highlight_neighbors_hexagone(self, hexagone, color:str):
+        hexagones_collided = self.get_neighbors_hexagone(hexagone)
+        for hex in hexagones_collided:
+            if color == "green":
+                hex.render(self.drawsurf, (0,255,0,70), (0,255,0,255), width=3)
+            elif color == "red":
+                hex.render(self.drawsurf, (255,0,0,70), (255,0,0,255), width=3)
 
     def highlight_non_empty(self, group: pygame.sprite.Group) -> None:
         """highlight hexgone on the board collinding with a sprit group
@@ -324,6 +390,7 @@ class BoardZone():
         Args:
             group (pygame.sprite.Group): Sprite groupe to checke
         """
+        self.drawsurf.fill(pygame.Color('#00000000'))
         for hexagone in self.hexagones:
             if pygame.sprite.spritecollideany(hexagone, group):
                 hexagone.render(self.drawsurf, self.green, self.green_highlight, width=5)
@@ -340,7 +407,6 @@ class BoardZone():
         for hexagone in self.hexagones:
             if not hexagone.collide:
                 hexagone.render(self.drawsurf, self.green, self.green_highlight, width=5)
-        # self.drawsurf.blit
 
 class Button(pygame.sprite.Sprite):
     """Simple button sprite
@@ -362,6 +428,7 @@ class Button(pygame.sprite.Sprite):
                 if self.rect.collidepoint(event.pos):
                     self.enable = False
                     return True
+
     def render(self, surface):
         """display button
         Args:
@@ -369,7 +436,7 @@ class Button(pygame.sprite.Sprite):
         """
         if self.enable:
             surface.blit(self.image, self.rect)
-            pygame.display.flip()
+            # pygame.display.flip()
 
 class View():
     """class for prompting board and tiles
@@ -384,7 +451,6 @@ class View():
         self.tiles_board = pygame.sprite.Group()
         self.tiles_deck = pygame.sprite.Group()
         self.tiles_board_moving = pygame.sprite.Group()
-        self.tiles_defausse = pygame.sprite.Group()
         self.discardzone = DiscardZone(self.displaysurf)
         self.endbutton = EndButton(self.displaysurf)
         self.rerollbutton = RerollButton(self.displaysurf, enable=False)
@@ -415,13 +481,12 @@ class View():
     def get_tile_to_discard(self):
         """move tile to the discard list if collide with the discard zone
         """
-        indexes_discard = []
         for tile in self.tiles_hand:
             if pygame.sprite.collide_rect(tile, self.discardzone):
                 self.discardzone.tiles.add(tile)
-                indexes_discard.append(tile.id_tile)
+                self.tiles_hand.remove(tile)
 
-    def get_tile_to_keep(self) -> List[int]:
+    def get_id_tile_to_keep(self) -> List[int]:
         """return index of tile to keep in hand
 
         Returns:
@@ -501,6 +566,7 @@ class View():
         self.display_screen()
         self.tiles_hand.draw(self.displaysurf)
 
+
     def move_tile_board(self, event_list):
         """move tile_board_moving sprite group
 
@@ -518,39 +584,3 @@ class View():
         for tile in self.tiles_board_moving:
             self.tiles_board_moving.remove(tile)
             self.tiles_board.add(tile)
-
-if __name__ == "__main__":
-
-    view = View()
-    board = BoardZone()
-    board.generate_sprite()
-    view.display_screen()
-    
-    # pygame.draw.polygon(view.displaysurf, (100,0,0,50), board.vertices)
-    # pygame.draw.circle(view.displaysurf, (0,0,100,50),radius=50, center = (200,200))
-    # pygame.draw.aalines(view.displaysurf, (50,50,50), closed=True, points=board.vertices)
-
-    # s = pygame.Surface((960,720), pygame.SRCALPHA)   # per-pixel alpha
-    # s.fill(pygame.Color('#00000000'))                # notice the alpha value in the color
-
-    
-    RUN = True
-    while RUN:
-        view.framepersec.tick(144)
-        
-        view.display_screen()
-        events_list = pygame.event.get()
-        # pygame.draw.circle(view.displaysurf, (0,255,0), (491, 362), 10)
-        board.displaygreenboard()
-
-        # pygame.draw.circle(view.displaysurf, (0,255,0), (491, 362), 10)
-        view.displaysurf.blit(board.drawsurf, (0,0))
-
-
-        for events in events_list:
-            if events.type == pygame.QUIT:
-                RUN = False
-                pygame.quit()
-                sys.exit()
-        
-        pygame.display.flip()

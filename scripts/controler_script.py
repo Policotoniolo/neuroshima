@@ -8,8 +8,9 @@ from typing import Dict
 
 import pygame
 
-from model_script import Player, HexBoard
-from view import View
+from model_script import Player, HexBoard, Tile
+from view import View, TileView
+from functions import *
 
 # pylint: disable=no-member
 
@@ -25,16 +26,16 @@ class GameController:
 
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
-        self.cfg = [{'name':'paul', 'army':'outpost'},
-                    {'name':'benoit', 'army':'borgo'}]
+        self.cfg = [{'name':'paul', 'army':'borgo'}, 
+                    {'name':'benoit', 'army':'outpost'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS)
+        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'outpost'])
+        self.all_tiles = []
         # View
         self.view = View()
         # Controller
-        # self.game_evaluator = game_evaluator
-        self.turn_time = turn_time
+        self.turn_time = turn_time #Pas encore utilisé, permettra de mettre un temps max par tour
 
     def _add_player(self, name, army_name):
         self.players.append(Player(name, army_name))
@@ -65,61 +66,266 @@ class GameController:
         """
         return len(player.deck.tiles)
 
-    def get_info_from_id_tile(self, id_tile:str, player: Player) -> Dict :
+    def get_hq_tile_player(self, player: Player) -> Tile|None:
+        hq_tile = self.get_one_model_tile(player.deck.army_name+"-qg")
+        if hq_tile is not None:
+            return hq_tile
+
+    def get_info_from_id_tile(self, id_tile:str) -> Dict :
         """retrieve informations of a tile model in a deck player from a id tile
 
         Args:
             id_tile (str): id tile
             player (Player): Instance of Player
         """
-        for tile in player.deck.all_tiles:
+        for tile in self.all_tiles:
             if tile.id_tile == id_tile:
                 return tile.__dict__
         return {}
 
+    def get_one_model_tile(self, id_tile) -> Tile|None:
+        """retrieve one tile model in a deck player from a id tile
+
+        Args:
+            id_tile (str): id tile
+        """
+        for tile in self.all_tiles:
+            if tile.id_tile == id_tile:
+                return tile
+
+    def get_one_view_tile(self, id_tile) -> TileView|None:
+        """retrieve one tile view if the tile is on the board model and boardview
+
+        Args:
+            id_tiles (_type_): id_tile
+        """
+        for tileview in self.view.tiles_board:
+            if tileview.id_tile == id_tile:
+                return tileview
+
     def actiontile(self, player, event_list):
         """generate actions for using tile type action"""
 
-        for tile in self.view.tiles_hand:
-            tile_informations = self.get_info_from_id_tile(tile.id_tile, player)
-            if tile_informations['action'] == "movement":
-                self._movement_tile(tile)
-            if tile_informations['action'] == "sniper":
-                self._sniper_tile(tile, event_list)
+        for tileview in self.view.tiles_hand:
+            if (tileview.drag.dragging == True or 
+                self.view.boardzone.single_collision(tileview)
+                ):
+                tile_informations = self.get_info_from_id_tile(tileview.id_tile)
+                if tile_informations['action'] == "movement":
+                    self._movement_tile(tileview,player ,event_list)
+                elif tile_informations['action'] == "sniper":
+                    self._sniper_tile(tileview, event_list)
+                elif tile_informations['action'] == "grenade":
+                    self._grenade_tile(tileview, player, event_list)
+                elif tile_informations['action'] == "battle":
+                    self._battle_tile(tileview)
+                elif tile_informations['action'] == "push":
+                    self._push_tile(tileview, event_list)
+                elif tile_informations['action'] == "airstrike":
+                    self._airstrike_tile(tileview, event_list)
 
-    def _movement_tile(self, tile):
+    def _movement_tile(self, tileview, player, event_list):
         """generate action tile of movement
         """
-        if tile.drag.dragging:
-            self.view.boardzone.displaygreenboard()
+        if tileview.drag.dragging:
+            army = tileview.id_tile.split("-")[0]
+            army_cube_position = self.board.occupied[army]
+            army_pixel_position = list_cubes_to_pixel(army_cube_position)
+            self.view.boardzone.highlight_hexagones(army_pixel_position)
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
-        elif not tile.drag.dragging :
-            tile_collided = pygame.sprite.spritecollideany(tile,
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-            if tile_collided is not None:
-                self.view.tiles_hand.remove(tile)
-                self.view.tiles_board.remove(tile_collided)
-                self.view.tiles_board_moving.add(tile_collided)
+        tile_collided = pygame.sprite.spritecollideany(
+            tileview,
+            self.view.tiles_board,
+            pygame.sprite.collide_rect_ratio(0.75)
+        )
+        if tile_collided is not None:
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile)
+            if  (tile_collided_info == {} or 
+                    tile_collided_info['army_name'] != player.deck.army_name
+                    ):
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tileview)
+                    self.view.tiles_board.remove(tileview)
+                    self.view.tiles_board.remove(tile_collided)
+                    self.view.tiles_board_moving.add(tile_collided)
 
-    def _sniper_tile(self, tile, event_list):
+    def _sniper_tile(self, tileview, event_list):
         """Generate action tile for sniper tile
         """
-        if tile.drag.dragging:
+        army = tileview.id_tile.split("-")[0]
+        enemy_army = next_element(self.board.armies, army)
+
+        tile_collided = pygame.sprite.spritecollideany(
+            tileview,
+            self.view.tiles_board,
+            pygame.sprite.collide_rect_ratio(0.75)
+        )
+
+        if tileview.drag.dragging:
+
+            enemies_cube_position = self.board.occupied[enemy_army].copy()
+            enemy_hq_position = self.get_info_from_id_tile(enemy_army+"-qg")['board_position']
+            enemies_cube_position.remove(enemy_hq_position)
+            enemies_pixel_position = list_cubes_to_pixel(enemies_cube_position)
+            self.view.boardzone.highlight_hexagones(enemies_pixel_position)
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if tile_collided is not None:
+
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile)
+            if  (tile_collided_info == {} or 
+                    tile_collided_info["kind"] == "base" or 
+                    tile_collided_info["army_name"] != enemy_army
+                    ):
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tileview)
+                    self.view.tiles_board.remove(tileview)
+                    self.single_damage(tile_collided)
+
+    def _grenade_tile(self, tileview: TileView, player, event_list):
+        """Generate action tile for grenade tile
+        """
+        tile_collided = pygame.sprite.spritecollideany(tileview, # type: ignore
+                                                        self.view.tiles_board,
+                                                        pygame.sprite.collide_rect_ratio(0.75))
+        n = get_neighbors(self.get_hq_tile_player(player).board_position) # type: ignore
+        p = list_cubes_to_pixel(n)
+        if tileview.drag.dragging:
+            self.view.boardzone.highlight_hexagones(p)  #not working
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if tile_collided is not None:
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile)
+            if (tile_collided_info == {} or 
+                    tile_collided_info["kind"] == "base" or 
+                    tile_collided_info['army_name'] == player.deck.army_name or
+                    tile_collided_info['board_position'] not in n
+                    ):
+                return
+            else:
+                if tile_collided.click_tile(event_list, self.view.displaysurf):
+                    self.view.tiles_hand.remove(tileview)
+                    self.single_damage(tile_collided)
+
+    def _battle_tile(self, tileview: TileView):
+        """Generate action for battle tile
+
+        Args:
+            tileview (TileView): TileView object
+        """
+        if tileview.drag.dragging:
             self.view.boardzone.displaygreenboard()
             self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
 
-        elif not tile.drag.dragging :
-            tile_collided = pygame.sprite.spritecollideany(tile,
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-            if tile_collided is not None:
-                if tile_collided.click_tile(event_list, self.view.displaysurf):
-                    print('yo')
-                    self.view.tiles_hand.remove(tile)
-                    self.view.tiles_board.remove(tile_collided)
-                    self.view.tiles_defausse.add(tile_collided)
+        elif not tileview.drag.dragging:
+            if self.view.boardzone.single_collision(tileview): # type: ignore
+                self.launch_battle()
+
+    def _push_tile(self, tileview: TileView, event_list):
+        """Generate action for push tile
+
+        Args:
+            tileview (TileView): TileView object
+            event_list (_type_): pygame events list
+        """
+        tile_collided = pygame.sprite.spritecollideany(
+            tileview, # type: ignore
+            self.view.tiles_board,
+            pygame.sprite.collide_rect_ratio(0.10)
+        )
+
+        if tileview.drag.dragging:
+
+            army = tileview.id_tile.split("-")[0]
+            allies_cube_position = self.board.occupied[army]
+            allies_pixel_position = list_cubes_to_pixel(allies_cube_position)
+            self.view.boardzone.highlight_hexagones(allies_pixel_position)
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if tile_collided is not None:
+            tile_collided_info = self.get_info_from_id_tile(tile_collided.id_tile)
+            if  (tile_collided_info == {} or 
+                    tile_collided_info['army_name'] != tileview.id_tile.split("-")[0] 
+                    ):
+                return
+            else:
+                n_tile_collided = get_neighbors(tile_collided_info['board_position'])
+                p_tile_collided = list_cubes_to_pixel(n_tile_collided)
+                hexagone = self.view.boardzone.highlight_and_click_hexagones(
+                    p_tile_collided, 
+                    event_list
+                )
+                self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+                if hexagone is not None:
+                    enemy_tileview = pygame.sprite.spritecollideany(
+                        hexagone, # type: ignore
+                        self.view.tiles_board
+                    )
+                    self.view.tiles_hand.remove(tileview)
+                    self.view.tiles_board.remove(enemy_tileview)
+                    self.view.tiles_board_moving.add(enemy_tileview)
+
+    def _airstrike_tile(self, tileview: TileView, event_list):
+        """Generate action for airstrike tile
+
+        Args:
+            tileview (TileView): TileView object
+            event_list (_type_): pygame events list
+        """
+        inner_board_positions = [
+    (376,284),(376,369),(451,241),(451,327),(450,413),(525,370),(525,284)
+        ]
+        inner_hexagones_board = self.view.boardzone.get_multiple_hexa(
+            inner_board_positions
+            )
+        hexagone_collided = pygame.sprite.spritecollideany(
+            tileview, # type: ignore
+            inner_hexagones_board # type: ignore
+        ) 
+        if tileview.drag.dragging:
+            self.view.boardzone.highlight_hexagones(inner_board_positions)
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+        elif not tileview.drag.dragging:
+            self.view.boardzone.drawsurf.fill((pygame.Color('#00000000')))
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+        if hexagone_collided is not None:
+            self.view.boardzone.highlight_neighbors_hexagone(hexagone_collided, "red")
+            self.view.displaysurf.blit(self.view.boardzone.drawsurf,(0,0))
+
+            if tileview.click_tile(event_list, self.view.displaysurf):
+                self.view.tiles_hand.remove(tileview)
+                hexagone_damaged = self.view.boardzone.get_neighbors_hexagone(
+                    hexagone_collided
+                    )
+                for tile in self.view.tiles_board:
+                    if (pygame.sprite.spritecollideany(
+                        tile, 
+                        hexagone_damaged) is not None # type: ignore
+                        and tile.id_tile.split('-')[1] != "qg"):
+                        self.single_damage(tile)
+
+    def launch_battle(self):
+        print("BATTLE !")
+        return
+
+    def single_damage(self, tileview: TileView) -> None:
+        """generate one damage on a tileview and update model. Use for action tile
+
+        Args:
+            tileview (TileView): Tileview to damage
+        """
+        tilemodel = self.get_one_model_tile(tileview.id_tile)
+        if tilemodel is not None and tilemodel.life_point is not None:
+            tilemodel.life_point = tilemodel.life_point-1
+            if tilemodel.life_point <= 0:
+                self.view.tiles_board.remove(tileview)
+                self.board.remove_tile_from_board(tileview.id_tile)
 
     def _start_game(self):
         """Initiate first turn for placing hq
@@ -131,6 +337,7 @@ class GameController:
         for player in self.players:
 
             player.deck.init_deck()
+            self.all_tiles = self.all_tiles + player.deck.tiles
             player.get_tiles(1)
 
             id_tiles = self.get_id_tiles_from_hand(player)
@@ -155,6 +362,7 @@ class GameController:
                     run = False
                     self.view.hand_tile_to_board()
                     player.discard_tiles_hand(id_tiles_to_keep=[])
+                    self.update_board_model()
 
             player.deck.shuffle_deck()
 
@@ -184,51 +392,81 @@ class GameController:
         Args:
             player (Player): Instance of Player Class
         """
-        self.view.display_screen()
 
+        self.view.display_screen()
+        
+        self.update_unite_with_movement(player)
         self.view.move_tile_hand(event_list)
         self.view.move_tile_board(event_list)
-
+        self.update_board_view_from_hand()
 
         self.view.generate_all_sprite_group()
         self.view.display_all_sprite()
 
         self.actiontile(player, event_list)
+
         pygame.display.flip()
 
         if self.view.endbutton.isvalidated(event_list):
 
             self.view.remove_tiles_board_moving()
-            self.view.get_tile_to_discard()              ##### CREER une fonction unique dans view ici
-            index_tile_to_keep = self.view.get_tile_to_keep()    ##### CREER une fonction unique dans view ici
-            index_tile_to_board = self.view.hand_tile_to_board() ##### CREER une fonction unique dans view ici
-            for id_tile in index_tile_to_board:
-                self.board.add_tile_to_board(player.hand.get_tile_by_name(id_tile))
-            player.discard_tiles_hand(index_tile_to_keep)
-            
+            self.view.get_tile_to_discard()              
+            id_tileviews_to_keep = self.view.get_id_tile_to_keep() 
+            player.discard_tiles_hand(id_tileviews_to_keep)
+            self.update_board_model()
             return True
 
-    def end_turn(self, player: Player):
-        """_summary_
+    def update_tile_model(self, id_tile: str, pixel_position: tuple, angle_index: int) -> None:
+        """Update a tile on the baord model
 
         Args:
-            player (Player): _description_
+            id_tile (str): id of the tile
+            pixel_position (tuple): Pixel position on the screen
+            angle_index (int): Index of the angle of the tile
         """
+        tilemodel = self.get_one_model_tile(id_tile)
+        self.board.add_tile_to_board(tilemodel)
+        cube_coordinates = coordinates_pixel_to_cube(pixel_position)
+        if tilemodel is not None and cube_coordinates is not None:
+            old_board_position = tilemodel.board_position
+            tilemodel.rotational_direction = angle_index
+            tilemodel.board_position = cube_coordinates # type: ignore
+            self.board.occupied[tilemodel.army_name].append(cube_coordinates)
+            self.board.occupied[tilemodel.army_name].remove(old_board_position)
 
     def update_board_model(self):
         """Save actual board from view into the board model
         """
+        for tileview in self.view.tiles_board:
+            id_tile = tileview.id_tile
+            pixel_position = tileview.rect.topleft
+            angle_index = tileview.angle_index
+            self.update_tile_model(id_tile, pixel_position, angle_index)
 
-        #### Save les modifications du board existant
+    def update_unite_with_movement(self, player: Player):
+        for tilemodel in self.board.tiles[player.deck.army_name]:
+            if (tilemodel.special_capacities is not None and
+            "movement" in tilemodel.special_capacities):
+                tileview = self.get_one_view_tile(tilemodel.id_tile)
+                if tileview not in self.view.tiles_hand:
+                    self.view.tiles_board_moving.add(tileview)
 
-        #### Save les changement des tiles de la main
-
-        self.board.tiles = []
-        for tile in self.view.tiles_board:
-            # self.board.tiles.append(Tile())
-            return
-
-
+    def update_board_view_from_hand(self):
+        """Update the board model while moving tileview from hand
+        """
+        for tileview in self.view.tiles_hand:
+            tileviewinfo = self.get_info_from_id_tile(tileview.id_tile)
+            if tileviewinfo["kind"] in ["unite", "module"]:
+                if pygame.sprite.spritecollideany(
+                    tileview, 
+                    self.view.boardzone.hexagones
+                ) is not None:
+                    self.view.tiles_board.add(tileview)
+                    if tileview.rect.topleft in list(BOARD_PIXEL_TO_CUBE.keys()):
+                        self.update_tile_model(tileview.id_tile, tileview.rect.topleft, tileview.angle_index)
+                else:
+                    self.view.tiles_board.remove(tileview)
+                    self.board.remove_tile_from_board(tileview.id_tile)
 
 
     def run(self):
@@ -260,18 +498,10 @@ class GameController:
                         sys.exit()
 
                 if self.player_turn(player, event_list):
-                    self.end_turn(player)
                     round_iteration +=1
                     run = False
 
 
-
 if __name__ == "__main__":
     game = GameController()
-    # # for elt in game.cfg:
-    # #     game._add_player(elt["name"], elt['army'])
-    # # game.players[0].deck.init_deck()
-    # # print(game.get_info_from_id_tile('outpost-mouvement1', game.players[0])['kind'])
     game.run()
-    # print(sys.path)
-
