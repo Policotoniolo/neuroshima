@@ -2,10 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode
 
 # Test File
 borgo_test.py
 outpost_test.py
+
 
 # C extensions
 *.so
@@ -133,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
 
 # Spyder project settings
 .spyderproject
