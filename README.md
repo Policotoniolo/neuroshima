@@ -127,7 +127,7 @@ liste des élements utilisés dans la class View:
  - EndButton : button permettant la fin du tour
  - RerollButton : Pas encore utilisé, permettra de re-initialiser le tour
  - DiscardZone : Zone permettant de jeter une tuile. Ils suffit de faire glisser une tuile dessus
- - KeepZone : Zone permettant de conserver une tuile pour le tour suivant du joueur. Ils suffit de faire glisser une tuile dessus. Attention c'est zone ne marche pas pour le moment
+ - KeepZone : Zone permettant de conserver une tuile pour le tour suivant du joueur. Ils suffit de faire glisser une tuile dessus.
  - Button : permet de générer un bouton sur une position donnée du board
 
 Ici les position des tuiles sont calculés par rapport à la posistion (x,y) des pixels de l'écran
