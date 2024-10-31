@@ -193,3 +193,5 @@ Ensuite les joueurs pourront tirer des tuiles et les jouer. Comme les QG les tui
 Pour les tuiles actions, des zones en surbrillance sont afficher pour les actions. Seul la tuile combat (tuile avec une sorte d'explosion dessus) ne fait rien pour le moment car je n'ai pas encore codé les combats.
 
 ![alt text](image/readme_images/video2.gif)
+
+IL n'y a pas encore de fin vue que les combats ne peuvent pas être lancés.
