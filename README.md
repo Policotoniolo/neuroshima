@@ -110,10 +110,10 @@ La position sur board sont des coordonnées cubiques (q,r,s):
 ![alt text](image/readme_images/cube_coordinates2.png)
 
 
-Les attaques des tuiles, filets et shields sont aussi définits par des coordonnées. 
+Les attaques des tuiles, filets et boucliers sont aussi définits par des coordonnées. 
 C'est coordonnées représentes l'angles par rapport à la position (0,0,0) sur le board et donc la direction vers laquelle l'attaque (ou autre) à lieu.
 
-Un index a été definit selon l'angle de rotation de la tuile. Celui ci permet de recalculer les directions des attributs attaque, shields et filets de la tuile sui celle ci a été rotatée
+Un index a été definit selon l'angle de rotation de la tuile. Celui ci permet de recalculer les directions des attributs attaque, boucliers et filets de la tuile sui celle ci a été rotatée
 
 ### VIEW
 
