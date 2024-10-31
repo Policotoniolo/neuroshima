@@ -410,12 +410,9 @@ class GameController:
         if self.view.endbutton.isvalidated(event_list):
 
             self.view.remove_tiles_board_moving()
-            self.view.get_tile_to_discard()              ##### CREER une fonction unique dans view ici
-            index_tile_to_keep = self.view.get_tile_to_keep()    ##### CREER une fonction unique dans view ici
-            index_tile_to_board = self.view.hand_tile_to_board() ##### CREER une fonction unique dans view ici
-            for id_tile in index_tile_to_board:
-                self.board.add_tile_to_board(player.hand.get_tile_by_id(id_tile))
-            player.discard_tiles_hand(index_tile_to_keep)
+            self.view.get_tile_to_discard()              
+            id_tileviews_to_keep = self.view.get_id_tile_to_keep() 
+            player.discard_tiles_hand(id_tileviews_to_keep)
             self.update_board_model()
             return True
 

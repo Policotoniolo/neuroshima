@@ -481,14 +481,12 @@ class View():
     def get_tile_to_discard(self):
         """move tile to the discard list if collide with the discard zone
         """
-        indexes_discard = []
         for tile in self.tiles_hand:
             if pygame.sprite.collide_rect(tile, self.discardzone):
                 self.discardzone.tiles.add(tile)
                 self.tiles_hand.remove(tile)
-                indexes_discard.append(tile.id_tile)
 
-    def get_tile_to_keep(self) -> List[int]:
+    def get_id_tile_to_keep(self) -> List[int]:
         """return index of tile to keep in hand
 
         Returns:
