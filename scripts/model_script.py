@@ -5,7 +5,7 @@ import random
 import importlib
 import sys
 
-from typing import List, Literal
+from typing import List, Literal, Tuple
 
 # lien entre l'index de la direction de la rotaion et les coordonnées.
 # Ce sont les coordonnées en imaginant que la tuile est au centre.
@@ -47,7 +47,7 @@ class Tile:
                 net: List[tuple]|None,
                 life_point: int|None,
                 shields_position: List[tuple]|None,
-                special_capacities: List[str]|None,
+                special_capacities: List[str],
                 module: List[dict]|None,
                 action : str,
                 url_image: str):
@@ -69,6 +69,7 @@ class Tile:
         self.module = module
         self.action = action
         self.is_netted = False
+        self.module_effects = []
         self.url_image = url_image
 
     def _coordinates_positive_rotation(self,coordinnates: tuple[int, int, int]
