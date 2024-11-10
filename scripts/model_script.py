@@ -380,6 +380,19 @@ class HexBoard():
                 self.tiles[self.armies[1]].pop(index)
                 return
 
+    def get_tile_by_position(self, position: Tuple[int, int, int]) -> Tile|None:
+        """get a tile from the board according to the position
+
+        Args:
+            id_tile (int): id of the tile
+        """
+        for tile in self.tiles[self.armies[0]]:
+            if tile.board_position == position:
+                return tile
+        for tile in self.tiles[self.armies[1]]:
+            if tile.board_position == position:
+                return tile
+
 
     def create_board(self):
         """Create the hexa board
