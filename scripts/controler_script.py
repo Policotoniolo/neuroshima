@@ -10,6 +10,8 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View, TileView
+from moduleevaluator import ModuleEvaluator
+from battleevaluator import BattleEvaluator
 from functions import *
 
 # pylint: disable=no-member
@@ -35,6 +37,8 @@ class GameController:
         # View
         self.view = View()
         # Controller
+        self.moduleevaluator = ModuleEvaluator(self.board)
+        self.battleevaluator = BattleEvaluator(self.board, self.moduleevaluator, self.view)
         self.turn_time = turn_time #Pas encore utilisé, permettra de mettre un temps max par tour
 
     def _add_player(self, name, army_name):
@@ -128,7 +132,7 @@ class GameController:
         """generate action tile of movement
         """
         if tileview.drag.dragging:
-            army = tileview.id_tile.split("-")[0]
+            army = player.deck.army_name
             army_cube_position = self.board.occupied[army]
             army_pixel_position = list_cubes_to_pixel(army_cube_position)
             self.view.boardzone.highlight_hexagones(army_pixel_position)
