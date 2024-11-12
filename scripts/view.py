@@ -110,7 +110,10 @@ class TileView(pygame.sprite.Sprite):
         for number in ["1", "2", "3", "4", "5", "6", "7"]:
             self.url_image = self.url_image.replace(number, "")
         self.url_image = "image/armies/"+self.url_image+".png"
-        self.image = pygame.transform.smoothscale(pygame.image.load(self.url_image), (81,70))
+        self.image = pygame.transform.smoothscale(
+            pygame.image.load(self.url_image), 
+            (81,70)
+        )
         self.rect = self.image.get_rect()
         self.angle_index = angle_index
         self.rect.topleft = position
@@ -118,7 +121,8 @@ class TileView(pygame.sprite.Sprite):
         self.button = Button(self.rect.topleft)
 
     def _clean_postition(self):
-        """transform approximative position to real board posistion (global POSITION_LIST)
+        """transform approximative position to real board posistion 
+        (global POSITION_LIST)
         """
         pos_relative = [((self.rect.topleft[0] - position[0])**2) +
                         (self.rect.topleft[1] - position[1])**2
@@ -161,6 +165,14 @@ class Hexagone(pygame.sprite.Sprite):
         self.vertices = self._compute_vertice()
 
         self.button = Button(self.rect.topleft)
+        self.cac_attacks_button = Button(
+            (position[0]+2, position[1]+20),
+            image="cac_attack"
+        )
+        self.range_attacks_button = Button(
+            (position[0]+42, position[1]+20), 
+            image="range_attack"
+        )
 
     def minimal_radius(self) -> float:
         """Horizontal length of the hexagon"""
@@ -190,6 +202,17 @@ class Hexagone(pygame.sprite.Sprite):
         self.button.enable = True
         self.button.render(surface)
         return self.button.isvalidated(event_list)
+
+    def attacks_cac_click_button(self, event_list, surface):
+        self.cac_attacks_button.enable = True
+        self.cac_attacks_button.render(surface)
+        return self.cac_attacks_button.isvalidated(event_list)
+
+    def attacks_range_click_button(self, event_list, surface):
+        self.range_attacks_button.enable = True
+        self.range_attacks_button.render(surface)
+        return self.range_attacks_button.isvalidated(event_list)
+
 
 class EndButton(pygame.sprite.Sprite):
     """end button turn sprite
@@ -411,10 +434,10 @@ class BoardZone():
 class Button(pygame.sprite.Sprite):
     """Simple button sprite
     """
-    def __init__(self, position, enable=False) -> None:
+    def __init__(self, position, image:str = "rerollbutton", size: tuple = (35,35), enable=False) -> None:
         super().__init__()
-        self.image = pygame.image.load("image/rerollbutton.png")
-        self.image = pygame.transform.scale(self.image, (35, 35))
+        self.image = pygame.image.load(f"image/{image}.png")
+        self.image = pygame.transform.scale(self.image, size)
         self.rect = self.image.get_rect()
         self.rect.topleft = position
         self.validated = False
@@ -584,3 +607,28 @@ class View():
         for tile in self.tiles_board_moving:
             self.tiles_board_moving.remove(tile)
             self.tiles_board.add(tile)
+
+if __name__ == "__main__":
+    hex = Hexagone((376,369))
+    view = View()
+    view.display_screen()
+    run = True
+    while run:
+
+        event_list = pygame.event.get()
+        for event in event_list:
+            view.display_screen()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            
+            hex.render(view.boardzone.drawsurf,(0,255,0,71), (0,255,0,255), width=3)
+            
+            
+            if hex.attacks_cac_click_button(event_list, view.boardzone.drawsurf):
+                print("yo")
+            if hex.attacks_range_click_button(event_list, view.boardzone.drawsurf):
+                print("yo")
+            view.displaysurf.blit(view.boardzone.drawsurf, (0,0))
+            pygame.display.flip()
+            
