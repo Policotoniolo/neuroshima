@@ -29,10 +29,10 @@ class GameController:
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
         self.cfg = [{'name':'paul', 'army':'borgo'}, 
-                    {'name':'benoit', 'army':'outpost'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
+                    {'name':'benoit', 'army':'moloch'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'outpost'])
+        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'moloch'])
         self.all_tiles = []
         # View
         self.view = View()
@@ -195,9 +195,12 @@ class GameController:
         """Generate action tile for grenade tile
         """
         tile_collided = pygame.sprite.spritecollideany(tileview, # type: ignore
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-        n = get_neighbors(self.get_hq_tile_player(player).board_position) # type: ignore
+                                            self.view.tiles_board,
+                                            pygame.sprite.collide_rect_ratio(0.75)
+                                        )
+        n = get_neighbors(
+            self.get_hq_tile_player(player).board_position # type: ignore
+            ) 
         p = list_cubes_to_pixel(n)
         if tileview.drag.dragging:
             self.view.boardzone.highlight_hexagones(p)  #not working
