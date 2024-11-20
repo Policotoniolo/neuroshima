@@ -48,6 +48,7 @@ class Tile:
                 life_point: int|None,
                 shields_position: List[tuple]|None,
                 special_capacities: List[str],
+                board_position: Tuple[int, int, int],
                 module: List[dict]|None,
                 action : str,
                 url_image: str):
@@ -64,10 +65,10 @@ class Tile:
         self.life_point = life_point
         self.shields_position = shields_position
         self.special_capacities = special_capacities
-        self.board_position = None
         self.rotational_direction = 0
         self.module = module
         self.action = action
+        self.board_position = board_position
         self.is_netted = False
         self.module_effects = []
         self.url_image = url_image
@@ -252,7 +253,8 @@ class Deck:
                     special_capacities=dict_tile['special_capacities'],
                     module=dict_tile['module'],
                     action=dict_tile['action'],
-                    url_image=dict_tile['url_image']
+                    url_image=dict_tile['url_image'],
+                    board_position = (-1,-1,-1) # init with impossible cube position
                 ))
 
     def remove_top_deck_tile(self) -> Tile|None:
@@ -381,18 +383,16 @@ class HexBoard():
                 self.tiles[self.armies[1]].pop(index)
                 return
 
-    def get_tile_by_position(self, position: Tuple[int, int, int]) -> Tile|None:
+    def find_tile_at_position(self, army_name: str, position: Tuple[int, int, int]) -> Tile|None:
         """get a tile from the board according to the position
 
         Args:
             id_tile (int): id of the tile
         """
-        for tile in self.tiles[self.armies[0]]:
+        for tile in self.tiles[army_name]:
             if tile.board_position == position:
                 return tile
-        for tile in self.tiles[self.armies[1]]:
-            if tile.board_position == position:
-                return tile
+        return None
 
 
     def create_board(self):
