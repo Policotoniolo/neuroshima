@@ -329,13 +329,11 @@ class BoardZone():
             hexagone = Hexagone(position=position)
             self.hexagones.add(hexagone)
 
-    def get_hexagone_by_position(self, position: tuple) -> Hexagone|None:
-        try:
-            for hexagone in self.hexagones:
-                if hexagone.position == position:
-                    return hexagone
-        except StopIteration:
-            print("Any valide position")
+    def get_hexagone_by_position(self, position: tuple) -> Hexagone:
+        for hexagone in self.hexagones:
+            if hexagone.position == position:
+                return hexagone
+        raise StopIteration("Any valide position")
 
     def get_multiple_hexa(self, positions: List[tuple]) -> List[Hexagone]:
         hexagones = []
@@ -443,7 +441,7 @@ class Button(pygame.sprite.Sprite):
         self.validated = False
         self.enable = enable
 
-    def isvalidated(self, event_list):
+    def isvalidated(self, event_list) -> None|bool:
         """return true if button click
         """
         for event in event_list:
