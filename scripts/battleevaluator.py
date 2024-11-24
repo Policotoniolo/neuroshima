@@ -63,7 +63,8 @@ class BattleEvaluator:
                     tilemodel,
                     cac_attack_pixel,
                     event_list)
-        tileconverted = self._converte_attacks_and_copy_tile(tilemodel, range_attack_to_converte, cac_attack_to_converte)
+        tileconverted = self._converte_attacks_and_copy_tile(
+            tilemodel, range_attack_to_converte, cac_attack_to_converte)
 
         self.fire(tileconverted)
         self.module_evaluator._clean_quartiermaitre_effect_on_tile(tilemodel)
@@ -96,8 +97,10 @@ class BattleEvaluator:
     def run_battle(self, event_list):
         initiative_round = self._get_max_initiative()
         while initiative_round >= 0:
+            self.module_evaluator.apply_all_effect_modules()
             self.battle_round(initiative_round=initiative_round,
                             event_list=event_list)
+            self.module_evaluator.clean_all_effect_modules()
             initiative_round -= 1
 
 # --- MÉTHODES PRIVÉES ---
@@ -105,7 +108,7 @@ class BattleEvaluator:
     def _get_max_initiative(self) -> int:
         """Return the biggest initiative on the model board"""
         return max(
-            max(tilemodel.initiative) for army in self.board.armies 
+            max(tilemodel.initiative) for army in self.board.armies
             for tilemodel in self.board.tiles[army]
         )
 
@@ -221,13 +224,13 @@ class BattleEvaluator:
                         range_attack_power - shield_point)
                     touched = True
 
-    def _get_pixel_positions_cac_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]]|None:
+    def _get_pixel_positions_cac_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]] | None:
         if tilemodel.range_attacks_direction:
             real_range_attack_directions = [calculate_position(
                 x, tilemodel.board_position) for x in tilemodel.range_attacks_direction]
             return list_cubes_to_pixel(real_range_attack_directions)
 
-    def _get_pixel_positions_range_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]]|None:
+    def _get_pixel_positions_range_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]] | None:
         if tilemodel.cac_attacks_direction is not None:
             real_cac_attack_directions = [calculate_position(
                 x, tilemodel.board_position) for x in tilemodel.cac_attacks_direction]
@@ -240,7 +243,7 @@ class BattleEvaluator:
     def _prompt_and_get_attacke_direction_convertion(self,
                                         tilemodel: Tile,
                                         attack_pixel_positions: List[Tuple[int, int]],
-                                        event_list) -> Tuple[int, int, int]|None:
+                                        event_list) -> Tuple[int, int, int] | None:
 
         for pixel_position in attack_pixel_positions:
             hex = self.view.boardzone.get_hexagone_by_position(
@@ -261,14 +264,16 @@ class BattleEvaluator:
         return tilecopy
 
     def _converte_range_attack(self, tilemodel: Tile, range_attack_to_converte):
-        index_power = tilemodel.range_attacks_direction.index(range_attack_to_converte)
+        index_power = tilemodel.range_attacks_direction.index(
+            range_attack_to_converte)
         tilemodel.range_attacks_direction.remove(range_attack_to_converte)
         power = tilemodel.range_attacks_power[index_power]
         tilemodel.cac_attacks_direction.append(range_attack_to_converte)
         tilemodel.cac_attacks_power.append(power)
 
     def _converte_cac_attack(self, tilemodel: Tile, cac_attack_to_converte):
-        index_power = tilemodel.cac_attacks_direction.index(cac_attack_to_converte)
+        index_power = tilemodel.cac_attacks_direction.index(
+            cac_attack_to_converte)
         tilemodel.cac_attacks_direction.remove(cac_attack_to_converte)
         power = tilemodel.cac_attacks_power[index_power]
         tilemodel.range_attacks_direction.append(cac_attack_to_converte)
