@@ -192,7 +192,7 @@ class BattleEvaluator:
         cac_attack_position = self._calculate_position(
             tilemodel.board_position, cac_attack_direction
         )
-        enemy_tilemodel = self.board.find_tile_at_position(
+        enemy_tilemodel = self.board.find_army_tile_at_position(
             enemy_army_name, cac_attack_position
         )
         if enemy_tilemodel and enemy_tilemodel.life_point:
@@ -225,7 +225,7 @@ class BattleEvaluator:
             range_attack_position = self. _calculate_position(
                 range_attack_position, range_attack_direction
             )
-            enemy_tilemodel = self.board.find_tile_at_position(
+            enemy_tilemodel = self.board.find_army_tile_at_position(
                 enemy_army_name,
                 range_attack_position
             )
