@@ -383,17 +383,29 @@ class HexBoard():
                 self.tiles[self.armies[1]].pop(index)
                 return
 
-    def find_tile_at_position(self, army_name: str, position: Tuple[int, int, int]) -> Tile|None:
-        """get a tile from the board according to the position
+    def find_army_tile_at_position(self, army_name: str, position: Tuple[int, int, int]) -> Tile|None:
+        """get a tile of a specific army from the board according to the position
 
         Args:
-            id_tile (int): id of the tile
+            army_name (str): Name of the army
+            position: Position of the tile to get. Cubique coordinates
         """
         for tile in self.tiles[army_name]:
             if tile.board_position == position:
                 return tile
         return None
 
+    def find_any_tile_at_position(self,  position: Tuple[int, int, int]) -> Tile|None:
+        """get a tile of all army from the board according to the position
+
+        Args:
+            id_tile (int): id of the tile
+        """
+        for army_name in self.armies:
+            for tile in self.tiles[army_name]:
+                if tile.board_position == position:
+                    return tile
+        return None
 
     def create_board(self):
         """Create the hexa board
