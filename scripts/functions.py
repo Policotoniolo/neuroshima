@@ -120,3 +120,20 @@ def get_neighbors(cube_coordinates: tuple) -> list:
 def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[Tuple[int, int]]|None:
     list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates if x in list(BOARD_PIXEL_TO_CUBE.values())]
     return list_pixels_coordinates
+
+def calculate_position( start_position: Tuple[int, int, int],
+                        direction: Tuple[int, int, int]
+                        ) -> Tuple[int, int, int]:
+    """
+    Calculates the new position on a hexagonal grid by applying a directional offset.
+
+    Args:
+        start_position (Tuple[int, int, int]): The starting position in cube coordinates.
+        direction (Tuple[int, int, int]): The directional vector in cube coordinates.
+
+    Returns:
+        Tuple[int, int, int]: The resulting position after adding the direction to the start position.
+    """
+    return tuple(
+        map(sum, zip(start_position, direction))
+    )  # type: ignore

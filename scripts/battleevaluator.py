@@ -113,24 +113,6 @@ class BattleEvaluator:
         """Return the enemey name of army_name"""
         return next_element(self.board.armies, army_name)
 
-    def _calculate_position(self,
-                            start_position: Tuple[int, int, int],
-                            direction: Tuple[int, int, int]
-                            ) -> Tuple[int, int, int]:
-        """
-        Calculates the new position on a hexagonal grid by applying a directional offset.
-
-        Args:
-            start_position (Tuple[int, int, int]): The starting position in cube coordinates.
-            direction (Tuple[int, int, int]): The directional vector in cube coordinates.
-
-        Returns:
-            Tuple[int, int, int]: The resulting position after adding the direction to the start position.
-        """
-        return tuple(
-            map(sum, zip(start_position, direction))
-        )  # type: ignore
-
     def _apply_cac_attacks(self, tilemodel: Tile, enemy_army_name: str):
         """
         Executes all cac attacks from a tile against an enemy army.
@@ -189,7 +171,7 @@ class BattleEvaluator:
             cac_attack_power (int): The power of the close-combat attack.
         """
 
-        cac_attack_position = self._calculate_position(
+        cac_attack_position = calculate_position(
             tilemodel.board_position, cac_attack_direction
         )
         enemy_tilemodel = self.board.find_army_tile_at_position(
@@ -222,7 +204,7 @@ class BattleEvaluator:
         range_attack_position = tilemodel.board_position
         while self._is_within_board_range(range_attack_position) or not touched:
 
-            range_attack_position = self. _calculate_position(
+            range_attack_position = calculate_position(
                 range_attack_position, range_attack_direction
             )
             enemy_tilemodel = self.board.find_army_tile_at_position(
@@ -241,13 +223,13 @@ class BattleEvaluator:
 
     def _get_pixel_positions_cac_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]]|None:
         if tilemodel.range_attacks_direction:
-            real_range_attack_directions = [self._calculate_position(
+            real_range_attack_directions = [calculate_position(
                 x, tilemodel.board_position) for x in tilemodel.range_attacks_direction]
             return list_cubes_to_pixel(real_range_attack_directions)
 
     def _get_pixel_positions_range_attacks(self, tilemodel: Tile) -> List[Tuple[int, int]]|None:
         if tilemodel.cac_attacks_direction is not None:
-            real_cac_attack_directions = [self._calculate_position(
+            real_cac_attack_directions = [calculate_position(
                 x, tilemodel.board_position) for x in tilemodel.cac_attacks_direction]
             return list_cubes_to_pixel(real_cac_attack_directions)
 
