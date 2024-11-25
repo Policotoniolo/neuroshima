@@ -9,15 +9,16 @@ class ModuleEvaluator:
     This class evaluates and manages effects of game modules on tiles of a `HexBoard`.
     It is esponsible for applying, cleaning, 
     and managing module effects on a hexagonal game board.
-    
+
     Modules can be divided into 3 categories:
         - Modules with priority : this module effects have to be applied in first. 
         For exemple for modules taking control of enemy units
         - Modules with active effects : this modules effect have a impact ouside a battle (not like initiative)
         For exemple a module giving movement to friendly unit
         - Modules with non priority : "Classic" effect used only for battle, like initiative bonus, damage bonus.
-    
+
     """
+
     def __init__(self, board: HexBoard) -> None:
         """Initializes the evaluator with a game board.
 
@@ -197,7 +198,8 @@ class ModuleEvaluator:
                     modules_prio.append(tile)
         return modules_prio
 
-    def _get_effects_modules(self, modules: List[Tile]) -> Tuple[List[str], List[Tuple[int, int, int]]]:
+    def _get_effects_modules(self, modules: List[Tile]) \
+            -> Tuple[List[str], List[Tuple[int, int, int]]]:
         """Retrieves module effects and affected positions from a list of module tiles.
 
         Args:
@@ -216,13 +218,13 @@ class ModuleEvaluator:
                 for effect in module_tile.module:
                     effect_type = [list(effect.keys())[0]]
                     affected_position = [
-                        calculate_position(x, module_tile.board_position )
+                        calculate_position(x, module_tile.board_position)
                         for x in list(effect.values())[0]
                     ]
                     effects.extend([effect_type] * len(affected_position))
                     effect_positions.extend(affected_position)
-        return effects, effect_positions 
-        ### Attention les deux listes n'ont pas toujours la même taille (faire un test) 
+        return effects, effect_positions
+        # Attention les deux listes n'ont pas toujours la même taille (faire un test)
 
     def _get_non_prio_army_modules(self, army_name: str) -> List[Tile]:
         """Returns a list of non priority module tiles for the specified army.
