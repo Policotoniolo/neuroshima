@@ -117,19 +117,32 @@ class ModuleEvaluator:
                     modules_prio.append(tile)
         return modules_prio
 
-    def _get_effects_modules(self, modules: List[Tile]):
-        liste_effects_prio = []
-        liste_effects_position_prio = []
+    def _get_effects_modules(self, modules: List[Tile]) -> Tuple[List[str], List[Tuple[int, int, int]]]:
+        """Retrieves module effects and affected positions from a list of module tiles.
+
+        Args:
+            modules (List[Tile]): List of modules
+
+        Returns:
+            Tuple[List[str], List[Tuple[int, int, int]]]: 
+            list of effects and list of cube position where applied the effect. 
+            The two indexes of the two list match
+        """
+        effects = []
+        effect_positions = []
+
         for module_tile in modules:
-            if module_tile.module is not None and module_tile.board_position is not None:
+            if module_tile.module and module_tile.board_position:
                 for effect in module_tile.module:
-                    effect_type = list(effect.keys())[0]
-                    affected_position = list(effect.values())[0]
-                    affected_position = [calculate_position(x, module_tile.board_position )
-                                        for x in affected_position]
-                    liste_effects_prio.append(effect_type)
-                    liste_effects_position_prio.append(affected_position)
-        return (liste_effects_prio, liste_effects_position_prio)
+                    effect_type = [list(effect.keys())[0]]
+                    affected_position = [
+                        calculate_position(x, module_tile.board_position )
+                        for x in list(effect.values())[0]
+                    ]
+                    effects.extend([effect_type] * len(affected_position))
+                    effect_positions.extend(affected_position)
+        return effects, effect_positions 
+        ### Attention les deux listes n'ont pas toujours la même taille (faire un test) 
 
     def _get_non_prio_army_modules(self, army_name: str):
         modules = []
