@@ -17,6 +17,59 @@ class ModuleEvaluator:
         For exemple a module giving movement to friendly unit
         - Modules with non priority : "Classic" effect used only for battle, like initiative bonus, damage bonus.
 
+    
+    Attributes
+    ----------
+        board (HexBoard): The game board containing tiles and army information.
+
+    Methods
+    ----------
+        __init__(board: HexBoard) -> None:
+            Initializes the evaluator with a game board.
+
+        apply_all_effect_modules() -> None:
+            Applies priority and non-priority module effects for all armies
+
+        clean_all_effect_modules() -> None:
+            Cleans all module effects from all tiles on the board.
+
+        apply_active_module_effect() -> None:
+            Applies active module effects for all armies.
+
+        clean_active_module_effect() -> None:
+            Clean active module effects from all tiles on the board.
+
+    Private Methods
+    ----------
+        _apply_one_effect_on_tile(tilemodel: Tile, effect_type: str) -> None:
+            Applies a specific effect to a tile based on its type.
+
+        _clean_one_effect_on_tile(tilemodel: Tile, effect_type: str) -> None:
+            Clean a specific effect from a tile based on its type.
+
+        _apply_<effect_name>_effect_on_tile(tilemodel: Tile) -> None:
+            Applies a specific type of module effect (e.g., "medic", "range_augment").
+        
+        _clean_<effect_name>_effect_on_tile(tilemodel: Tile) -> None:
+            Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+
+        _apply_prio_effect_modules_army(army_name: str) -> None:
+            Applies priority module effects for a given army.
+
+        _apply_non_prio_effect_modules_army(army_name: str) -> None:
+            Applies non priority module effects for a given army.
+
+        _get_effects_modules(modules: List[Tile]) -> Tuple[List[str], List[List[Position]]]:
+            Retrieves module effects and affected positions from a list of module tiles.
+
+        _get_prio_army_modules(army_name: str) -> List[Tile]:
+            Returns a list of priority module tiles for the specified army.
+
+        _get_non_prio_army_modules(army_name: str) -> List[Tile]:
+            Returns a list of non priority module tiles for the specified army.
+
+        _get_active_army_modules(army_name: str) -> List[Tile]:
+            Returns a list of active modules for the specified army.
     """
 
     def __init__(self, board: HexBoard) -> None:
@@ -380,7 +433,7 @@ class ModuleEvaluator:
         tilemodel.module_effects.remove("quartiermaitre")
 
     def _clean_one_effect_on_tile(self, tilemodel: Tile, effect_type: str) -> None:
-        """Removes a specific effect from a tile based on its type.
+        """Clean a specific effect from a tile based on its type.
 
         Args:
             tilemodel (Tile): Tile affected
