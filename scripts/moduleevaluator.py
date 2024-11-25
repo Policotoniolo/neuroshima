@@ -139,7 +139,8 @@ class ModuleEvaluator:
         tilemodel.module_effects.append("cac_augment")
         if tilemodel.cac_attacks_power is not None:
             tilemodel.cac_attacks_power = (
-                [cac_attack_power + 1 for cac_attack_power in tilemodel.cac_attacks_power]
+                [cac_attack_power + 1 
+                for cac_attack_power in tilemodel.cac_attacks_power]
             )
 
     def _apply_range_augment_effect_on_tile(self, tilemodel: Tile) -> None:
@@ -167,7 +168,8 @@ class ModuleEvaluator:
                 [initiative + 1 for initiative in tilemodel.initiative]
             )
 
-    def _apply_double_initiative_effect_on_tile(self, tilemodel: Tile) -> None:
+    def _apply_double_initiative_effect_on_tile(self, tilemodel: Tile
+                                                ) -> None:
         """Applies a specific type of module effect (e.g., "medic", "range_augment").
 
         Args:
@@ -211,7 +213,10 @@ class ModuleEvaluator:
         """
         tilemodel.module_effects.append("quartiermaitre")
 
-    def _apply_one_effect_on_tile(self, tilemodel: Tile, effect_type: str) -> None:
+    def _apply_one_effect_on_tile(self,
+                                tilemodel: Tile, 
+                                effect_type: str
+                            ) -> None:
         """Applies a specific effect to a tile based on its type.
 
         Args:
@@ -319,8 +324,8 @@ class ModuleEvaluator:
             army_name (str): army name
         """
         modules_prio = self._get_prio_army_modules(army_name)
-        list_effects_prio, list_effects_position_prio = self._get_effects_modules(
-            modules_prio)
+        list_effects_prio, list_effects_position_prio = \
+            self._get_effects_modules(modules_prio)
         for index, effect_prio in enumerate(list_effects_prio):
             effect_position_prio = list_effects_position_prio[index]
             tile = self.board.find_army_tile_at_position(
@@ -335,8 +340,8 @@ class ModuleEvaluator:
             army_name (str): army name
         """
         modules_non_prio = self._get_non_prio_army_modules(army_name)
-        list_effects_non_prio, list_effects_position_non_prio = self._get_effects_modules(
-            modules_non_prio)
+        list_effects_non_prio, list_effects_position_non_prio = \
+            self._get_effects_modules(modules_non_prio)
         for index, effect_non_prio in enumerate(list_effects_non_prio):
             effect_position_non_prio = list_effects_position_non_prio[index]
             tile = self.board.find_army_tile_at_position(
@@ -361,8 +366,11 @@ class ModuleEvaluator:
         tilemodel.module_effects.remove("cac_augment")
         if tilemodel.cac_attacks_power is not None:
             tilemodel.cac_attacks_power = (
-                [cac_attack_power - 1 for cac_attack_power in tilemodel.cac_attacks_power]
-            )
+                [
+                cac_attack_power - 1 
+                for cac_attack_power in tilemodel.cac_attacks_power
+            ]
+        )
 
     def _clean_range_augment_effect_on_tile(self, tilemodel: Tile) -> None:
         """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
@@ -377,7 +385,8 @@ class ModuleEvaluator:
                     1 for range_attack_power in tilemodel.range_attacks_power]
             )
 
-    def _clean_initiative_augment_effect_on_tile(self, tilemodel: Tile) -> None:
+    def _clean_initiative_augment_effect_on_tile(self,
+                                                tilemodel: Tile) -> None:
         """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
 
         Args:
@@ -389,14 +398,15 @@ class ModuleEvaluator:
                 [initiative - 1 for initiative in tilemodel.initiative]
             )
 
-    def _clean_double_initiative_effect_on_tile(self, tilemodel: Tile) -> None:
+    def _clean_double_initiative_effect_on_tile(self,
+                                                tilemodel: Tile) -> None:
         """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
         """
         tilemodel.module_effects.remove("double_initiative")
-        if tilemodel.initiative is not None and len(tilemodel.initiative) >= 2:
+        if tilemodel.initiative and len(tilemodel.initiative) >= 2:
             min_init = min(tilemodel.initiative)
             tilemodel.initiative.remove(min_init)
 
@@ -432,7 +442,10 @@ class ModuleEvaluator:
         """
         tilemodel.module_effects.remove("quartiermaitre")
 
-    def _clean_one_effect_on_tile(self, tilemodel: Tile, effect_type: str) -> None:
+    def _clean_one_effect_on_tile(self,
+                                tilemodel: Tile,
+                                effect_type: str
+                            ) -> None:
         """Clean a specific effect from a tile based on its type.
 
         Args:
