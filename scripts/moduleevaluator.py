@@ -20,7 +20,7 @@ class ModuleEvaluator:
                     self._clean_one_effect_on_tile(tile, effect)
 
     def apply_active_module_effect(self):
-        self._clean_active_module_effect()
+        self.clean_active_module_effect()
         army_with_active_modules = 'hegemony'
         modules = self._get_active_army_modules(army_with_active_modules)
         for module in modules:
@@ -32,6 +32,13 @@ class ModuleEvaluator:
                     if tile:
                         tile.module_effects.append("transport")
                         tile.special_capacities.append("movement")
+
+    def clean_active_module_effect(self):
+        for army_name in self.board.armies:
+            for tile in self.board.tiles[army_name]:
+                if "transport" in tile.module_effects:
+                    tile.module_effects.remove("transport")
+                    tile.special_capacities.remove("movement")
 
 # --- MÉTHODES PRIVÉES ---
 
@@ -228,10 +235,3 @@ class ModuleEvaluator:
                 if tile.id_tile == "hegemony-transport":
                     modules_active.append(tile)
         return modules_active
-
-    def _clean_active_module_effect(self):
-        for army_name in self.board.armies:
-            for tile in self.board.tiles[army_name]:
-                if "transport" in tile.module_effects:
-                    tile.module_effects.remove("transport")
-                    tile.special_capacities.remove("movement")
