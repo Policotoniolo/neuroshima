@@ -384,7 +384,7 @@ class ModuleEvaluator:
 
         Args:
             tilemodel (Tile): Tile affected
-            effect_type (str): *effect type
+            effect_type (str): effect type
         """
         if effect_type == "medic":
             self._clean_medic_effect_on_tile(tilemodel)
