@@ -14,25 +14,22 @@ class ModuleEvaluator:
             self._apply_non_prio_effect_modules_army(army_name)
 
     def clean_all_effect_modules(self):
-        for tile in self.board.tiles[self.board.armies[0]]:
-            for effect in tile.module_effects:
-                self._clean_one_effect_on_tile(tile, effect)
-        for tile in self.board.tiles[self.board.armies[1]]:
-            for effect in tile.module_effects:
-                self._clean_one_effect_on_tile(tile, effect)
+        for army_name in self.board.armies:
+            for tile in self.board.tiles[army_name]:
+                for effect in tile.module_effects:
+                    self._clean_one_effect_on_tile(tile, effect)
 
     def apply_active_module_effect(self):
         self._clean_active_module_effect()
-        modules = self._get_active_army_modules()
+        army_with_active_modules = 'hegemony'
+        modules = self._get_active_army_modules(army_with_active_modules)
         for module in modules:
             if module.id_tile == "hegemony-transport":
-                list_effects, list_effects_position = self._get_effects_modules([
-                                                                                module])
-                for index, effect in enumerate(list_effects):
-                    effect_position = list_effects_position[index]
+                list_effects_position = self._get_effects_modules([module])[1]
+                for position in list_effects_position:
                     tile = self.board.find_any_tile_at_position(
-                        effect_position)
-                    if tile is not None:
+                        position)
+                    if tile:
                         tile.module_effects.append("transport")
                         tile.special_capacities.append("movement")
 
@@ -223,22 +220,19 @@ class ModuleEvaluator:
         elif effect_type == "quartiermaitre":
             self._clean_quartiermaitre_effect_on_tile(tilemodel)
 
-    def _get_active_army_modules(self):
+    def _get_active_army_modules(self, army_name: str):
         modules_active = []
-        for army_name in self.board.armies:
-            tiles = self.board.tiles[army_name]
-            for tile in tiles:
-                if tile.kind == "module":
-                    if tile.id_tile == "hegemony-transport":
-                        modules_active.append(tile)
+        tiles = self.board.tiles[army_name]
+        for tile in tiles:
+            if tile.kind == "module":
+                if tile.id_tile == "hegemony-transport":
+                    modules_active.append(tile)
         return modules_active
 
     def _clean_active_module_effect(self):
-        for tile in self.board.tiles[self.board.armies[0]]:
-            if "transport" in tile.module_effects:
-                tile.module_effects.append("transport")
-                tile.special_capacities.append("movement")
-        for tile in self.board.tiles[self.board.armies[1]]:
-            if "transport" in tile.module_effects:
-                tile.module_effects.append("transport")
-                tile.special_capacities.append("movement")
+        for army_name in self.board.armies:
+            for tile in self.board.tiles[army_name]:
+                if "transport" in tile.module_effects:
+                    tile.module_effects.remove("transport")
+                    tile.special_capacities.remove("movement")
+
