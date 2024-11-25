@@ -112,6 +112,9 @@ class BattleEvaluator:
         Args:
             tilemodel (Tile): The tile initiating the attack.
         """
+        if not isinstance(tilemodel, Tile):
+            raise ValueError(f"Invalid tile object: {tilemodel}")
+
         enemy_army_name = self._get_enemy_army(tilemodel.army_name)
 
         # Gérer les attaques CAC
@@ -127,6 +130,9 @@ class BattleEvaluator:
             tilemodel (Tile): The tile initiating the attack.
             event_list (List[pygame.event.Event]): Pygame events list
         """
+        if not isinstance(tilemodel, Tile):
+            raise ValueError(f"Invalid tile object: {tilemodel}")
+
         range_attack_pixel = self._get_pixel_positions_range_attacks(tilemodel)
         cac_attack_pixel = self._get_pixel_positions_cac_attacks(tilemodel)
         if range_attack_pixel:
