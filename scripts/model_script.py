@@ -5,7 +5,7 @@ import random
 import importlib
 import sys
 
-from typing import List, Literal
+from typing import List, Literal, Tuple
 
 # lien entre l'index de la direction de la rotaion et les coordonnées.
 # Ce sont les coordonnées en imaginant que la tuile est au centre.
@@ -40,14 +40,15 @@ class Tile:
                 id_tile:str,
                 kind: Literal['base', 'unite', 'module', 'fondation'],
                 initiative: List[int]|None,
-                range_attacks_direction: List[tuple]|None,
-                range_attacks_power: List[int]|None,
-                cac_attacks_direction: List[tuple]|None,
-                cac_attacks_power: List[int]|None,
-                net: List[int]|None,
+                range_attacks_direction: List[tuple],
+                range_attacks_power: List[int],
+                cac_attacks_direction: List[tuple],
+                cac_attacks_power: List[int],
+                net: List[tuple]|None,
                 life_point: int|None,
                 shields_position: List[tuple]|None,
-                special_capacities: List[str]|None,
+                special_capacities: List[str],
+                board_position: Tuple[int, int, int],
                 module: List[dict]|None,
                 action : str,
                 url_image: str):
@@ -64,10 +65,12 @@ class Tile:
         self.life_point = life_point
         self.shields_position = shields_position
         self.special_capacities = special_capacities
-        self.board_position = None
         self.rotational_direction = 0
         self.module = module
         self.action = action
+        self.board_position = board_position
+        self.is_netted = False
+        self.module_effects = []
         self.url_image = url_image
 
     def _coordinates_positive_rotation(self,coordinnates: tuple[int, int, int]
@@ -163,6 +166,27 @@ class Tile:
                             )
                 self.cac_attacks_direction = new_cac_attacks_direction
 
+    def _rotate_net(self, new_rotation_direction: int):
+        """Rotate net directions of a tile base on a new rotate direction.
+
+        Args:
+            new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
+        """
+        rotation_diff = new_rotation_direction - self.rotational_direction
+        if rotation_diff == 0:
+            return
+
+        for _ in range(abs(rotation_diff)):
+            if self.net is not None:
+                new_net_posistion = []
+
+                for net in self.net:
+                    if rotation_diff > 0:
+                        new_net_posistion.append(self._coordinates_positive_rotation(net))
+                    else:
+                        new_net_posistion.append(self._coordinates_negative_rotation(net))
+                self.net = new_net_posistion
+
     def rotate_tile(self, new_rotation_direction: int) -> None:
         """generate all the rotation (attacks, shields) of a tile
 
@@ -172,6 +196,7 @@ class Tile:
 
         self._rotate_attacks(new_rotation_direction)
         self._rotate_shield(new_rotation_direction)
+        self._rotate_net(new_rotation_direction)
 
         self.rotational_direction = new_rotation_direction
 
@@ -228,7 +253,8 @@ class Deck:
                     special_capacities=dict_tile['special_capacities'],
                     module=dict_tile['module'],
                     action=dict_tile['action'],
-                    url_image=dict_tile['url_image']
+                    url_image=dict_tile['url_image'],
+                    board_position = (-1,-1,-1) # init with impossible cube position
                 ))
 
     def remove_top_deck_tile(self) -> Tile|None:
@@ -357,6 +383,29 @@ class HexBoard():
                 self.tiles[self.armies[1]].pop(index)
                 return
 
+    def find_army_tile_at_position(self, army_name: str, position: Tuple[int, int, int]) -> Tile|None:
+        """get a tile of a specific army from the board according to the position
+
+        Args:
+            army_name (str): Name of the army
+            position: Position of the tile to get. Cubique coordinates
+        """
+        for tile in self.tiles[army_name]:
+            if tile.board_position == position:
+                return tile
+        return None
+
+    def find_any_tile_at_position(self,  position: Tuple[int, int, int]) -> Tile|None:
+        """get a tile of all army from the board according to the position
+
+        Args:
+            id_tile (int): id of the tile
+        """
+        for army_name in self.armies:
+            for tile in self.tiles[army_name]:
+                if tile.board_position == position:
+                    return tile
+        return None
 
     def create_board(self):
         """Create the hexa board

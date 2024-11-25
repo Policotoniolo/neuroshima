@@ -56,19 +56,24 @@ CUBE_DIRECTION_VECTORS =  [
     (-1, 0, +1), (-1, +1, 0), (0, +1, -1), 
 ] #Used for finding neighbors
 
-def coordinates_cube_to_pixel(cube_coordinates:tuple):
-    """Transform cube coordinates into pixel position
+def coordinates_cube_to_pixel(cube_coordinates:Tuple[int, int, int]) -> Tuple[int, int]:
+    """
+    Transforms cube coordinates into a pixel position.
 
     Args:
-        cube_coordinates (tuple): cube coordinates
+        cube_coordinates (Tuple[int, int, int]): Cube coordinates.
 
     Returns:
-        Tuple: Pixels posistion
+        Tuple[int, int]: Corresponding pixel position.
+
+    Raises:
+        KeyError: If the cube coordinates do not match any pixel position.
     """
-    try:
-        return [k for k, v in BOARD_PIXEL_TO_CUBE.items() if v == cube_coordinates][0]
-    except KeyError:
-        print("cube coordinates not good!")
+    for pixel_position, cube_coord in BOARD_PIXEL_TO_CUBE.items():
+        if cube_coord == cube_coordinates:
+            return pixel_position
+    raise KeyError("Invalid cube coordinates")
+
 
 
 def coordinates_pixel_to_cube(pixel_position:tuple) -> tuple:
@@ -112,6 +117,23 @@ def get_neighbors(cube_coordinates: tuple) -> list:
                     for x in CUBE_DIRECTION_VECTORS]
     return neighbors
 
-def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[Tuple[int, int]|None]:
+def list_cubes_to_pixel(list_cube_coordinates: List[tuple]) -> List[Tuple[int, int]]|None:
     list_pixels_coordinates = [coordinates_cube_to_pixel(x) for x in list_cube_coordinates if x in list(BOARD_PIXEL_TO_CUBE.values())]
     return list_pixels_coordinates
+
+def calculate_position( start_position: Tuple[int, int, int],
+                        direction: Tuple[int, int, int]
+                        ) -> Tuple[int, int, int]:
+    """
+    Calculates the new position on a hexagonal grid by applying a directional offset.
+
+    Args:
+        start_position (Tuple[int, int, int]): The starting position in cube coordinates.
+        direction (Tuple[int, int, int]): The directional vector in cube coordinates.
+
+    Returns:
+        Tuple[int, int, int]: The resulting position after adding the direction to the start position.
+    """
+    return tuple(
+        map(sum, zip(start_position, direction))
+    )  # type: ignore

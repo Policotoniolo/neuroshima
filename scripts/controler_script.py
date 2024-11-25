@@ -10,6 +10,8 @@ import pygame
 
 from model_script import Player, HexBoard, Tile
 from view import View, TileView
+from moduleevaluator import ModuleEvaluator
+from battleevaluator import BattleEvaluator
 from functions import *
 
 # pylint: disable=no-member
@@ -27,14 +29,16 @@ class GameController:
     def __init__(self, number_of_players=2, turn_time=60):
         # Model
         self.cfg = [{'name':'paul', 'army':'borgo'}, 
-                    {'name':'benoit', 'army':'outpost'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
+                    {'name':'benoit', 'army':'moloch'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'outpost'])
+        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'moloch'])
         self.all_tiles = []
         # View
         self.view = View()
         # Controller
+        self.moduleevaluator = ModuleEvaluator(self.board)
+        self.battleevaluator = BattleEvaluator(self.board, self.moduleevaluator, self.view)
         self.turn_time = turn_time #Pas encore utilisé, permettra de mettre un temps max par tour
 
     def _add_player(self, name, army_name):
@@ -128,7 +132,7 @@ class GameController:
         """generate action tile of movement
         """
         if tileview.drag.dragging:
-            army = tileview.id_tile.split("-")[0]
+            army = player.deck.army_name
             army_cube_position = self.board.occupied[army]
             army_pixel_position = list_cubes_to_pixel(army_cube_position)
             self.view.boardzone.highlight_hexagones(army_pixel_position)
@@ -191,9 +195,12 @@ class GameController:
         """Generate action tile for grenade tile
         """
         tile_collided = pygame.sprite.spritecollideany(tileview, # type: ignore
-                                                        self.view.tiles_board,
-                                                        pygame.sprite.collide_rect_ratio(0.75))
-        n = get_neighbors(self.get_hq_tile_player(player).board_position) # type: ignore
+                                            self.view.tiles_board,
+                                            pygame.sprite.collide_rect_ratio(0.75)
+                                        )
+        n = get_neighbors(
+            self.get_hq_tile_player(player).board_position # type: ignore
+            ) 
         p = list_cubes_to_pixel(n)
         if tileview.drag.dragging:
             self.view.boardzone.highlight_hexagones(p)  #not working
@@ -414,6 +421,7 @@ class GameController:
             id_tileviews_to_keep = self.view.get_id_tile_to_keep() 
             player.discard_tiles_hand(id_tileviews_to_keep)
             self.update_board_model()
+            self.update_netted_unite(player)
             return True
 
     def update_tile_model(self, id_tile: str, pixel_position: tuple, angle_index: int) -> None:
@@ -429,8 +437,10 @@ class GameController:
         cube_coordinates = coordinates_pixel_to_cube(pixel_position)
         if tilemodel is not None and cube_coordinates is not None:
             old_board_position = tilemodel.board_position
-            tilemodel.rotational_direction = angle_index
+
             tilemodel.board_position = cube_coordinates # type: ignore
+            tilemodel.rotate_tile(angle_index)
+
             self.board.occupied[tilemodel.army_name].append(cube_coordinates)
             self.board.occupied[tilemodel.army_name].remove(old_board_position)
 
@@ -442,6 +452,27 @@ class GameController:
             pixel_position = tileview.rect.topleft
             angle_index = tileview.angle_index
             self.update_tile_model(id_tile, pixel_position, angle_index)
+
+    def update_netted_unite(self, player: Player):
+
+        for tilemodel in self.board.tiles[player.deck.army_name]:
+            if tilemodel.net is not None:
+                for net_directions in tilemodel.net:
+                    netted_positions = tuple(map(sum, 
+                                                    zip(net_directions, 
+                                                        tilemodel.board_position
+                                                        )
+                                                    )
+                                            )
+                    if netted_positions in self.board.occupied[
+                        next_element(self.board.armies, player.deck.army_name)]:
+
+                        index = self.board.occupied[
+                        next_element(self.board.armies, player.deck.army_name)].index(netted_positions)
+                        enemy_tile = self.board.tiles[
+                        next_element(self.board.armies, player.deck.army_name)][index]
+                        enemy_tile.is_netted = True
+        
 
     def update_unite_with_movement(self, player: Player):
         for tilemodel in self.board.tiles[player.deck.army_name]:
