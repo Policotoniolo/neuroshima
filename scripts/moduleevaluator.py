@@ -235,4 +235,3 @@ class ModuleEvaluator:
                 if "transport" in tile.module_effects:
                     tile.module_effects.remove("transport")
                     tile.special_capacities.remove("movement")
-
