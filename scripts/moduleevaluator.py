@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from model_script import HexBoard, Tile
+from scripts.model import HexBoard, Tile
 from functions import next_element, calculate_position
 
 

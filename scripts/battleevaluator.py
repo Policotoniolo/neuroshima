@@ -3,7 +3,7 @@ from typing import List, Tuple
 import operator
 import copy
 
-from model_script import HexBoard, Tile
+from scripts.model import HexBoard, Tile
 from moduleevaluator import ModuleEvaluator
 from view import View
 from functions import *

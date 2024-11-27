@@ -8,7 +8,7 @@ from typing import Dict
 
 import pygame
 
-from model_script import Player, HexBoard, Tile
+from scripts.model import Player, HexBoard, Tile
 from scripts.config import BOARD_LIMIT, BOARD_PIXEL_TO_CUBE, CUBE_DIRECTION_VECTORS
 from view import View, TileView
 from moduleevaluator import ModuleEvaluator
