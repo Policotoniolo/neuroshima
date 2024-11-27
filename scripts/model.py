@@ -6,30 +6,115 @@ import importlib
 from dataclasses import dataclass, field
 
 from typing import List, Literal, Tuple, Optional
-@dataclass
 
+@dataclass
 class Tile:
-    """Class representing a tile
+    """
+    Represents a tile in a hexagonal grid-based game.
+
+    The `Tile` class models a game tile with attributes for its type,
+    position, combat characteristics, and special effects.
+    The tile's orientation can be rotated, which affects its attack,
+    defense, and other directional properties.
 
     Attributes
     ----------
-        army_name (str): Name of the army of the tile
-        kind (Literal['base', 'unite', 'module', 'fondation']): type of tile. 
-        Accepte "base", "unite", "module" or "fondation"
-        initiative (List[int] | None): Liste of initiative of the tile. None for module and action
-        range_attacks_direction (tuple | None): all attacks directions of the tile.
-        range_attacks_power (List[int] | None): all the range attacks power of the tile.
-        The index of this list correspond with the index of the range_attacks_direction list.
-        cac_attacks_direction (tuple[int, int, int] | None): 
-        all cac range attacks directions of the tile.
-        cac_attacks_power (List[int] | None):  all the cac attacks power of the tile. 
-        The index of this list correspond with the index of the range_attacks_direction list.
-        life_point (int | None): Number of life points. None for action
-        shields_position (tuple[int, int, int] | None): all the shields posisition of the tile.
-        special_capacities (List[str] | None): Liste of speciale capacites of the tile.
+        army_name (str): 
+            Name of the army the tile belongs to.
+        id_tile (str): 
+            Unique identifier for the tile.
+        kind (Literal['base', 'unite', 'module', 'fondation']): 
+            Type of the tile, which determines its role and behavior. 
+            Must be one of "base", "unite", "module", or "fondation".
+        initiative (Optional[List[int]]): 
+            List of initiative values for the tile,
+            determining turn order. 
+            None for tiles that do not participate in initiative-based
+            actions.
+        range_attacks_direction (List[tuple]): 
+            List of directions for ranged attacks in cube coordinates.
+        range_attacks_power (List[int]): 
+            Corresponding power values for ranged attacks. 
+            Each index aligns with `range_attacks_direction`.
+        cac_attacks_direction (List[tuple]): 
+            List of directions for close-combat (melee) attacks in cube
+            coordinates.
+        cac_attacks_power (List[int]): 
+            Corresponding power values for close-combat attacks. 
+            Each index aligns with `cac_attacks_direction`.
+        net_directions (Optional[List[tuple]]): 
+            Directions in which the tile can apply a "net" effect,
+            if applicable.
+        life_point (Optional[int]): 
+            Number of life points the tile has. None for tiles that are
+            not damageable.
+        shields_directions (Optional[List[tuple]]): 
+            Directions of shields for the tile in cube coordinates,
+            if applicable.
+        special_capacities (List[str]): 
+            List of special abilities or effects the tile possesses.
+        module (Optional[List[dict]]): 
+            List of module effects of the tile, where each module effect
+            has a name.
+            Only if kind tile is "module".
+            (key) and associated directional effects (values).
+        action (Optional[str]): 
+            Describes special action associated with the tile.
+            Only if kind tile is "action".
+        board_position (Tuple[int, int, int]): 
+            The tile's position on the game board in cube coordinates.
+        url_image (str): 
+            URL of the tile's image for display in the game interface.
+        is_netted (bool, default=False): 
+            Indicates whether the tile is currently under a "net" effect
+            , disabling some of its abilities.
+        module_effects (List, default_factory=list): 
+            Stores additional effects applied to the tile via modules.
+            Applicable if tile kind not action
+        rotational_index (Literal[0, 1, 2, 3, 4, 5], default=0): 
+            Current rotation of the tile, represented as an index from
+            0 to 5, corresponding to 60° increments on the hexagonal
+            grid.
+
+    Methods
+    ----------
+        rotate_tile(new_rotation_index: Literal[0, 1, 2, 3, 4, 5]
+                ) -> None:
+                Rotates the tile to a specified orientation.
+                This updates all directional attributes (e.g., attacks,
+                shields) to match the new orientation.
+
+    Private Methods
+    ----------
+        _direction_positive_rotation(direction: Tuple[int, int, int]
+                                ) -> Tuple[int, int, int]:
+            Rotates a direction vector 60° clockwise.
+        
+        _direction_negative_rotation(direction: Tuple[int, int, int]
+                                ) -> Tuple[int, int, int]:
+            Rotates a direction vector 60° counterclockwise.
+
+        _directions_rotation(directions: List[Tuple[int, int, int]],
+                            rotation_diff: int) 
+                        -> List[Tuple[int, int, int]]:
+            Rotates a list of direction vectors by a specified number of
+            steps.
+
+        _rotate_shield(rotation_diff: int) -> None:
+            Rotates the shield directions of the tile.
+
+        _rotate_attacks(rotation_diff: int) -> None:
+            Rotates the attack directions (both ranged and melee) of the
+            tile.
+
+        _rotate_net(rotation_diff: int) -> None:
+            Rotates the net effect directions of the tile.
+
+        _rotate_module(rotation_diff: int) -> None:
+            Rotates the directional effects of modules applied to the
+            tile.
     """
 
-    
     army_name: str
     id_tile: str
     kind: Literal['base', 'unite', 'module', 'fondation']
@@ -40,7 +125,7 @@ class Tile:
     cac_attacks_power: List[int]
     net_directions: Optional[List[tuple]]
     life_point: Optional[int]
-    shields_directions: Optional[List[tuple]]  ### rename in army dict
+    shields_directions: Optional[List[tuple]]
     special_capacities: List[str]
     module: Optional[List[dict]]
     action: Optional[str]
@@ -48,15 +133,17 @@ class Tile:
     url_image: str
     is_netted: bool = False
     module_effects: List = field(default_factory=list)
-    rotational_index:Literal[0,1,2,3,4,5] = 0 #ecrire dans la dostring
+    rotational_index:Literal[0,1,2,3,4,5] = 0
 
-    def rotate_tile(self, new_rotation_index: Literal[0,1,2,3,4,5]) -> None:
+    def rotate_tile(self, new_rotation_index: Literal[0,1,2,3,4,5]
+                ) -> None:
         """
         generate all the rotation (attacks, shields) of a tile 
         according to a new rotation direction.
 
         Args:
-            new_rotation_direction (int): New rotation index of the tile. Beetwen 0 and 5
+            new_rotation_direction (int): New rotation index of the 
+            tile. Beetwen 0 and 5
         """
         if not 0 <= new_rotation_index <= 5:
             raise ValueError("new_rotation_direction must be between 0 and 5.")
@@ -78,44 +165,75 @@ class Tile:
         """Return the rotated direction with a angle of +60°
 
         Args:
-            coordinnates (tuple[int, int, int]):  cube coordinnates to rotate. 
-            Cube coordinnates define on the hexaboard
+            direction (Tuple[int, int, int]): 
+                Direction coordinnates to rotate. 
+                Cube coordinnates define on the hexaboard
 
         Returns:
-            tuple: rotated
+            Tuple: direction rotated
         """
         q,r,s = direction
         return (-r, -s, -q)
 
-    def _direction_negative_rotation(self,direction: tuple[int, int, int]
-                                    ) -> tuple[int, int, int]:
+    def _direction_negative_rotation(
+                                self,direction: Tuple[int, int, int]
+                                ) -> Tuple[int, int, int]:
         """Return the rotated direction with a angle of -60°
 
         Args:
-            coordinnates (tuple[int, int, int]): cube coordinnates to rotate. 
-            Cube coordinnates define on the hexaboard
+            direction (Tuple[int, int, int]):
+                Direction to rotate. 
+                Cube coordinnates define on the hexaboard
 
         Returns:
-            tuple: coordinnates rotated
+            Tuple: direction rotated
         """
         q,r,s = direction
         return (-s, -q, -r)
 
-    def _directions_rotation(self, directions: List[Tuple[int, int, int]], rotation_diff: int) -> List[Tuple[int, int, int]]:
+    def _directions_rotation(self,
+                            directions: List[Tuple[int, int, int]],
+                            rotation_diff: int
+                        ) -> List[Tuple[int, int, int]]:
+        """
+        Rotate a list of direction by a speficied number of step 
+        (+60° or -60°)
+
+        Args:
+            directions (List[Tuple[int, int, int]]): 
+                A list of cube coordinates representing
+                the directions to be rotated.
+            rotation_diff (int): 
+                The number of rotation steps. 
+                A positive value indicates clockwise rotation,
+                while a negative value indicates
+                counterclockwise rotation.
+
+        Returns:
+            List[Tuple[int, int, int]]:
+                A new list of directions after applying the rotation.
+        """
         return [
                     (
                     self._direction_positive_rotation(direction)
                     if rotation_diff > 0
                     else self._direction_negative_rotation(direction)
                 ) 
-            for _ in range(abs(rotation_diff)) for direction in directions
-            ]
+            for _ in range(abs(rotation_diff))
+            for direction in directions
+        ]
 
     def _rotate_shield(self, rotation_diff: int) -> None:
-        """Rotate shields directions of a tile base on a new rotate direction.
+        """
+        Rotate shields directions of a tile by a speficied number of
+        step.
 
         Args:
-            new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
+            rotation_diff (int): 
+                The number of rotation steps. 
+                A positive value indicates clockwise rotation,
+                while a negative value indicates
+                counterclockwise rotation.
         """
         if self.shields_position:
             self.shields_position = self._directions_rotation(
@@ -124,10 +242,16 @@ class Tile:
                                             )
 
     def _rotate_attacks(self, rotation_diff: int) -> None:
-        """Rotate attacks directions of a tile base on a new rotate direction
+        """
+        Rotate attack directions of a tile by a speficied number of
+        step.
 
         Args:
-            new_rotation_direction (int): New direction of the tile. Beetwen 1 and 6
+            rotation_diff (int): 
+                The number of rotation steps. 
+                A positive value indicates clockwise rotation,
+                while a negative value indicates
+                counterclockwise rotation.
         """
         if self.range_attacks_direction:
             self.range_attacks_direction = self._directions_rotation(
@@ -141,10 +265,15 @@ class Tile:
                                     )
 
     def _rotate_net(self, rotation_diff: int) -> None:
-        """Rotate net directions of a tile base on a new rotate direction.
+        """
+        Rotate net directions of a tile by a speficied number of step.
 
         Args:
-            new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
+            rotation_diff (int): 
+                The number of rotation steps. 
+                A positive value indicates clockwise rotation,
+                while a negative value indicates
+                counterclockwise rotation.
         """
         if self.net_directions:
             self.net_directions = self._directions_rotation(
@@ -153,32 +282,25 @@ class Tile:
                         )
 
     def _rotate_module(self, rotation_diff: int) -> None:
+        """
+        Rotate module directions of a tile by a speficied number of
+        step.
+
+        Args:
+            rotation_diff (int): 
+                The number of rotation steps. 
+                A positive value indicates clockwise rotation,
+                while a negative value indicates
+                counterclockwise rotation.
+        """
         if self.module:
             for index, effect in enumerate(self.module):
                 effect_name = list(effect.keys())[0]
-                self.module[index][effect_name] = self._directions_rotation(
+                self.module[index][effect_name] = \
+                    self._directions_rotation(
                             list(effect.values())[0],
                             rotation_diff
                         )
-
-    def rotate_tile(self, new_rotation_direction: Literal[0,1,2,3,4,5]) -> None:
-        """generate all the rotation (attacks, shields) of a tile
-
-        Args:
-            new_rotation_direction (int): New direction of the tile. Beetwen 0 and 5
-        """
-        if not 0 <= new_rotation_direction <= 5:
-            raise ValueError("new_rotation_direction must be between 0 and 5.")
-
-        rotation_diff = new_rotation_direction - self.rotational_direction
-        if rotation_diff == 0:
-            return
-
-        self._rotate_attacks(new_rotation_direction)
-        self._rotate_shield(new_rotation_direction)
-        self._rotate_net(new_rotation_direction)
-        self._rotate_module(new_rotation_direction)
-        self.rotational_direction = new_rotation_direction
 
 
 class Deck:
