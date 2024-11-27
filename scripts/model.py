@@ -4,11 +4,13 @@ docstring
 import random
 import importlib
 
-from typing import List, Literal, Tuple
+from typing import List, Literal, Tuple, Optional
 
 class Tile:
     """Class representing a tile
-    Args:
+
+    Attributes
+    ----------
         army_name (str): Name of the army of the tile
         kind (Literal['base', 'unite', 'module', 'fondation']): type of tile. 
         Accepte "base", "unite", "module" or "fondation"
@@ -28,17 +30,17 @@ class Tile:
                 army_name: str,
                 id_tile:str,
                 kind: Literal['base', 'unite', 'module', 'fondation'],
-                initiative: List[int]|None,
+                initiative: Optional[List[int]],
                 range_attacks_direction: List[tuple],
                 range_attacks_power: List[int],
                 cac_attacks_direction: List[tuple],
                 cac_attacks_power: List[int],
-                net: List[tuple]|None,
-                life_point: int|None,
-                shields_position: List[tuple]|None,
+                net_directions: Optional[List[tuple]],
+                life_point: Optional[int],
+                shields_directions:  Optional[List[tuple]],
                 special_capacities: List[str],
                 board_position: Tuple[int, int, int],
-                module: List[dict]|None,
+                module: Optional[List[dict]],
                 action : str,
                 url_image: str):
 
@@ -50,21 +52,21 @@ class Tile:
         self.range_attacks_power = range_attacks_power
         self.cac_attacks_direction = cac_attacks_direction
         self.cac_attacks_power = cac_attacks_power
-        self.net = net
+        self.net_directions = net_directions
         self.life_point = life_point
-        self.shields_position = shields_position
+        self.shields_position = shields_directions
         self.special_capacities = special_capacities
-        self.rotational_direction = 0
         self.module = module
         self.action = action
         self.board_position = board_position
-        self.is_netted = False
-        self.module_effects = []
         self.url_image = url_image
+        self.is_netted: bool = False
+        self.module_effects: List = []
+        self.rotational_direction:Literal[0,1,2,3,4,5] = 0 #ecrire dans la dostring
 
-    def _coordinates_positive_rotation(self,coordinnates: tuple[int, int, int]
+    def _direction_positive_rotation(self,direction: tuple[int, int, int]
                                     ) -> tuple[int, int, int]:
-        """Return the rotated coordinnates with a angle of +60°
+        """Return the rotated direction with a angle of +60°
 
         Args:
             coordinnates (tuple[int, int, int]):  cube coordinnates to rotate. 
@@ -73,12 +75,12 @@ class Tile:
         Returns:
             tuple: rotated
         """
-        q,r,s = coordinnates[0], coordinnates[1], coordinnates[2]
-        return ((-r, -s, -q))
+        q,r,s = direction
+        return (-r, -s, -q)
 
-    def _coordinates_negative_rotation(self,coordinnates: tuple[int, int, int]
+    def _direction_negative_rotation(self,direction: tuple[int, int, int]
                                     ) -> tuple[int, int, int]:
-        """Return the rotated coordinnates with a angle of -60°
+        """Return the rotated direction with a angle of -60°
 
         Args:
             coordinnates (tuple[int, int, int]): cube coordinnates to rotate. 
@@ -87,106 +89,86 @@ class Tile:
         Returns:
             tuple: coordinnates rotated
         """
-        q,r,s = coordinnates[0], coordinnates[1], coordinnates[2]
-        return ((-s, -q, -r))
+        q,r,s = direction
+        return (-s, -q, -r)
 
-    def _rotate_shield(self, new_rotation_direction: int) -> None:
+    def _directions_rotation(self, directions: List[Tuple[int, int, int]], rotation_diff: int) -> List[Tuple[int, int, int]]:
+        return [
+                    (
+                    self._direction_positive_rotation(direction)
+                    if rotation_diff > 0
+                    else self._direction_negative_rotation(direction)
+                ) 
+            for _ in range(abs(rotation_diff)) for direction in directions
+            ]
+
+    def _rotate_shield(self, rotation_diff: int) -> None:
         """Rotate shields directions of a tile base on a new rotate direction.
 
         Args:
             new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
         """
-        rotation_diff = new_rotation_direction - self.rotational_direction
-        if rotation_diff == 0:
-            return
+        if self.shields_position:
+            self.shields_position = self._directions_rotation(
+                                                self.shields_position,
+                                                rotation_diff
+                                            )
 
-        for _ in range(abs(rotation_diff)):
-            if self.shields_position is not None:
-                new_shield_posistion = []
-
-                for shield in self.shields_position:
-                    if rotation_diff > 0:
-                        new_shield_posistion.append(self._coordinates_positive_rotation(shield))
-                    else:
-                        new_shield_posistion.append(self._coordinates_negative_rotation(shield))
-                self.shields_position = new_shield_posistion
-
-    def _rotate_attacks(self, new_rotation_direction: int) -> None:
+    def _rotate_attacks(self, rotation_diff: int) -> None:
         """Rotate attacks directions of a tile base on a new rotate direction
 
         Args:
             new_rotation_direction (int): New direction of the tile. Beetwen 1 and 6
         """
-        rotation_diff = new_rotation_direction - self.rotational_direction
+        if self.range_attacks_direction:
+            self.range_attacks_direction = self._directions_rotation(
+                                        self.range_attacks_direction,
+                                        rotation_diff
+                                    )
+        if self.cac_attacks_direction:
+            self.cac_attacks_direction = self._directions_rotation(
+                                        self.cac_attacks_direction,
+                                        rotation_diff
+                                    )
 
-        if rotation_diff == 0:
-            return None
-
-        for _ in range(abs(rotation_diff)):
-
-            if self.range_attacks_direction is not None:
-                new_range_attacks_direction = []
-
-                for range_attack in self.range_attacks_direction:
-
-                    if rotation_diff > 0:
-                        new_range_attacks_direction.append(
-                            self._coordinates_positive_rotation(range_attack)
-                            )
-                    else:
-                        new_range_attacks_direction.append(
-                            self._coordinates_negative_rotation(range_attack)
-                            )
-                self.range_attacks_direction = new_range_attacks_direction
-
-
-            if self.cac_attacks_direction is not None:
-                new_cac_attacks_direction = []
-
-                for cac_attack in self.cac_attacks_direction:
-
-                    if rotation_diff > 0:
-                        new_cac_attacks_direction.append(
-                            self._coordinates_positive_rotation(cac_attack)
-                            )
-                    elif rotation_diff < 0:
-                        new_cac_attacks_direction.append(
-                            self._coordinates_negative_rotation(cac_attack)
-                            )
-                self.cac_attacks_direction = new_cac_attacks_direction
-
-    def _rotate_net(self, new_rotation_direction: int):
+    def _rotate_net(self, rotation_diff: int) -> None:
         """Rotate net directions of a tile base on a new rotate direction.
 
         Args:
             new_rotation_direction (_type_): New direction of the tile. Beetwen 1 and 6
         """
+        if self.net_directions:
+            self.net_directions = self._directions_rotation(
+                            self.net_directions,
+                            rotation_diff
+                        )
+
+    def _rotate_module(self, rotation_diff: int) -> None:
+        if self.module:
+            for index, effect in enumerate(self.module):
+                effect_name = list(effect.keys())[0]
+                self.module[index][effect_name] = self._directions_rotation(
+                            list(effect.values())[0],
+                            rotation_diff
+                        )
+
+    def rotate_tile(self, new_rotation_direction: Literal[0,1,2,3,4,5]) -> None:
+        """generate all the rotation (attacks, shields) of a tile
+
+        Args:
+            new_rotation_direction (int): New direction of the tile. Beetwen 0 and 5
+        """
+        if not 0 <= new_rotation_direction <= 5:
+            raise ValueError("new_rotation_direction must be between 0 and 5.")
+
         rotation_diff = new_rotation_direction - self.rotational_direction
         if rotation_diff == 0:
             return
 
-        for _ in range(abs(rotation_diff)):
-            if self.net is not None:
-                new_net_posistion = []
-
-                for net in self.net:
-                    if rotation_diff > 0:
-                        new_net_posistion.append(self._coordinates_positive_rotation(net))
-                    else:
-                        new_net_posistion.append(self._coordinates_negative_rotation(net))
-                self.net = new_net_posistion
-
-    def rotate_tile(self, new_rotation_direction: int) -> None:
-        """generate all the rotation (attacks, shields) of a tile
-
-        Args:
-            new_rotation_direction (int): New direction of the tile. Beetwen 1 and 6
-        """
-
         self._rotate_attacks(new_rotation_direction)
         self._rotate_shield(new_rotation_direction)
         self._rotate_net(new_rotation_direction)
-
+        self._rotate_module(new_rotation_direction)
         self.rotational_direction = new_rotation_direction
 
 
@@ -236,9 +218,9 @@ class Deck:
                     range_attacks_power=dict_tile['range_attacks_power'],
                     cac_attacks_direction=dict_tile['cac_attacks_direction'],
                     cac_attacks_power=dict_tile['cac_attacks_power'],
-                    net=dict_tile['net'],
+                    net_directions=dict_tile['net'],
                     life_point=dict_tile['life_point'],
-                    shields_position=dict_tile['shields_position'],
+                    shields_directions=dict_tile['shields_position'],
                     special_capacities=dict_tile['special_capacities'],
                     module=dict_tile['module'],
                     action=dict_tile['action'],
