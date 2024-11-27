@@ -1,6 +1,3 @@
-"""
-docstring
-"""
 import random
 import importlib
 from dataclasses import dataclass, field
