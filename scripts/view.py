@@ -12,33 +12,7 @@ from typing import List
 import pygame
 from pygame.event import Event
 
-# pylint: disable=no-member
-
-# Variables
-
-ANGLES = {0:0, 1:-60, 2:-120, 3:-180, 4:-240, 5:-300}
-DISPLAY_SIZE = (960,720)
-TILE_HEIGHT = 70
-POSITION_LIST = [(302,241),
-                (301,326),
-                (301,411),
-                (377,198),
-                (376,284),
-                (376,369),
-                (376,455),
-                (451,155),
-                (451,241),
-                (451,327),
-                (450,413),
-                (450,499),
-                (525,199),
-                (525,284),
-                (525,370),
-                (524,455),
-                (599,242),
-                (598,328),
-                (598,413)]
-FPS = 60
+from scripts.config import ANGLES, DISPLAY_SIZE, FPS, PIXEL_POSITION_LIST
 
 ###
 
@@ -126,11 +100,11 @@ class TileView(pygame.sprite.Sprite):
         """
         pos_relative = [((self.rect.topleft[0] - position[0])**2) +
                         (self.rect.topleft[1] - position[1])**2
-                        for position in POSITION_LIST
+                        for position in PIXEL_POSITION_LIST
                     ]
         index_min = min(range(len(pos_relative)), key=pos_relative.__getitem__)
         if pos_relative[index_min] < 750:
-            self.rect.topleft = POSITION_LIST[index_min]
+            self.rect.topleft = PIXEL_POSITION_LIST[index_min]
             self.button.rect.topleft = self.rect.topleft
 
     def update(self, event_list):
@@ -325,7 +299,7 @@ class BoardZone():
     def generate_sprite(self) -> None:
         """generate all the hexagone of the board
         """
-        for position in POSITION_LIST:
+        for position in PIXEL_POSITION_LIST:
             hexagone = Hexagone(position=position)
             self.hexagones.add(hexagone)
 

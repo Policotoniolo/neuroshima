@@ -7,16 +7,6 @@ import sys
 
 from typing import List, Literal, Tuple
 
-# lien entre l'index de la direction de la rotaion et les coordonnées.
-# Ce sont les coordonnées en imaginant que la tuile est au centre.
-ROTATIONS =  {(0, -1, 1): 0,
-            (1, -1, 0): 1,
-            (1, 0, -1): 2,
-            (0, 1, -1): 3,
-            (-1, 1, 0): 4,
-            (-1, 0, 1): 5}
-
-
 class Tile:
     """Class representing a tile
     Args:
@@ -343,9 +333,9 @@ class Player:
 class HexBoard():
     """Describe the model Board
     """
-    def __init__(self, board_limit: int, deltas: list[list[int]], armies: List[str]) -> None:
+    def __init__(self, board_limit: int, cube_direction_vectors: list[Tuple[int, int, int]], armies: List[str]) -> None:
         self.board_limit = board_limit
-        self.deltas = deltas
+        self.cube_direction_vectors = cube_direction_vectors
         self.armies = armies
         self.tiles = {armies[0]:[], armies[1]:[]}
         self.hexes = []
@@ -427,9 +417,9 @@ class HexBoard():
                 else:
                     num_of_hexes_in_edge = r
                 for _ in range(num_of_hexes_in_edge):
-                    x = x+self.deltas[j][0]
-                    y = y+self.deltas[j][1]
-                    z = z+self.deltas[j][2]
+                    x = x+self.cube_direction_vectors[j][0]
+                    y = y+self.cube_direction_vectors[j][1]
+                    z = z+self.cube_direction_vectors[j][2]
 
                     self.hexes.append((x,y,z))
                     index += 1

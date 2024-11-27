@@ -9,16 +9,11 @@ from typing import Dict
 import pygame
 
 from model_script import Player, HexBoard, Tile
+from scripts.config import BOARD_LIMIT, BOARD_PIXEL_TO_CUBE, CUBE_DIRECTION_VECTORS
 from view import View, TileView
 from moduleevaluator import ModuleEvaluator
 from battleevaluator import BattleEvaluator
 from functions import *
-
-# pylint: disable=no-member
-
-#Board model variables.
-BOARD_LIMIT = 3
-DELTAS = [[1,0,-1],[0,1,-1],[-1,1,0],[-1,0,1],[0,-1,1],[1,-1,0]]
 
 
 class GameController:
@@ -32,7 +27,7 @@ class GameController:
                     {'name':'benoit', 'army':'moloch'}] # le choix des armées et joueur devra être amélioré. J'ai fait ça en attendant, non prio
         self.players = []
         self.number_of_players = number_of_players
-        self.board = HexBoard(BOARD_LIMIT,DELTAS, armies = ['borgo', 'moloch'])
+        self.board = HexBoard(BOARD_LIMIT,CUBE_DIRECTION_VECTORS, armies = ['borgo', 'moloch'])
         self.all_tiles = []
         # View
         self.view = View()
