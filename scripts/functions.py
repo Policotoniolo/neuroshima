@@ -140,6 +140,19 @@ def calculate_position(start_position: Tuple[int, int, int],
 
 def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int]
                         ) -> None:
+    """Validates a cube coordinate in a hexagonal
+        grid system and raises a ValueError if invalid.
+
+    Args:
+        cube_coordinate (Tuple[int, int, int]): The cube coordinate
+                                                to validate.
+
+    Raises:
+        ValueError: Not a tuple.
+        ValueError: Does not contain exactly three elements.
+        ValueError: Contains non-integer elements
+        ValueError: The sum of the three elements is not zero.
+    """
 
     if not isinstance(cube_coordinate, tuple):
         raise ValueError("Both start_position and direction must \
@@ -159,7 +172,18 @@ def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int]
 
 def raise_wrong_pixel_coordinate(pixel_coordinate: Tuple[int, int]
                         ) -> None:
+    """Validates a pixel coordinate and raises a ValueError if invalid.
 
+    Args:
+        pixel_coordinate (Tuple[int, int, int]): The pixel coordinate
+                                                to validate.
+
+    Raises:
+        ValueError: Not a tuple.
+        ValueError: Does not contain exactly two elements.
+        ValueError: Contains non-integer elements
+        ValueError: Does not oversize the sreen
+    """
     if not isinstance(pixel_coordinate, tuple):
         raise ValueError("Both start_position and direction must \
                     be tuples.")
