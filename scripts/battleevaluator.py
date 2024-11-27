@@ -1,3 +1,4 @@
+import pygame
 from typing import List, Tuple
 import operator
 import copy
