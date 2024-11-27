@@ -3,7 +3,6 @@ docstring
 """
 import random
 import importlib
-import sys
 
 from typing import List, Literal, Tuple
 
