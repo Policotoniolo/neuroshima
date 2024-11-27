@@ -3,8 +3,10 @@ docstring
 """
 import random
 import importlib
+from dataclasses import dataclass, field
 
 from typing import List, Literal, Tuple, Optional
+@dataclass
 
 class Tile:
     """Class representing a tile
@@ -26,46 +28,53 @@ class Tile:
         shields_position (tuple[int, int, int] | None): all the shields posisition of the tile.
         special_capacities (List[str] | None): Liste of speciale capacites of the tile.
     """
-    def __init__(self,
-                army_name: str,
-                id_tile:str,
-                kind: Literal['base', 'unite', 'module', 'fondation'],
-                initiative: Optional[List[int]],
-                range_attacks_direction: List[tuple],
-                range_attacks_power: List[int],
-                cac_attacks_direction: List[tuple],
-                cac_attacks_power: List[int],
-                net_directions: Optional[List[tuple]],
-                life_point: Optional[int],
-                shields_directions:  Optional[List[tuple]],
-                special_capacities: List[str],
-                board_position: Tuple[int, int, int],
-                module: Optional[List[dict]],
-                action : str,
-                url_image: str):
 
-        self.kind = kind
-        self.army_name = army_name
-        self.id_tile = id_tile
-        self.initiative = initiative
-        self.range_attacks_direction = range_attacks_direction
-        self.range_attacks_power = range_attacks_power
-        self.cac_attacks_direction = cac_attacks_direction
-        self.cac_attacks_power = cac_attacks_power
-        self.net_directions = net_directions
-        self.life_point = life_point
-        self.shields_position = shields_directions
-        self.special_capacities = special_capacities
-        self.module = module
-        self.action = action
-        self.board_position = board_position
-        self.url_image = url_image
-        self.is_netted: bool = False
-        self.module_effects: List = []
-        self.rotational_direction:Literal[0,1,2,3,4,5] = 0 #ecrire dans la dostring
+    
+    army_name: str
+    id_tile: str
+    kind: Literal['base', 'unite', 'module', 'fondation']
+    initiative: Optional[List[int]]
+    range_attacks_direction: List[tuple]
+    range_attacks_power: List[int]
+    cac_attacks_direction: List[tuple]
+    cac_attacks_power: List[int]
+    net_directions: Optional[List[tuple]]
+    life_point: Optional[int]
+    shields_directions: Optional[List[tuple]]  ### rename in army dict
+    special_capacities: List[str]
+    module: Optional[List[dict]]
+    action: Optional[str]
+    board_position: Tuple[int, int, int]
+    url_image: str
+    is_netted: bool = False
+    module_effects: List = field(default_factory=list)
+    rotational_index:Literal[0,1,2,3,4,5] = 0 #ecrire dans la dostring
 
-    def _direction_positive_rotation(self,direction: tuple[int, int, int]
-                                    ) -> tuple[int, int, int]:
+    def rotate_tile(self, new_rotation_index: Literal[0,1,2,3,4,5]) -> None:
+        """
+        generate all the rotation (attacks, shields) of a tile 
+        according to a new rotation direction.
+
+        Args:
+            new_rotation_direction (int): New rotation index of the tile. Beetwen 0 and 5
+        """
+        if not 0 <= new_rotation_index <= 5:
+            raise ValueError("new_rotation_direction must be between 0 and 5.")
+
+        rotation_diff = new_rotation_index - self.rotational_index
+        if rotation_diff == 0:
+            return
+
+        self._rotate_attacks(new_rotation_index)
+        self._rotate_shield(new_rotation_index)
+        self._rotate_net(new_rotation_index)
+        self._rotate_module(new_rotation_index)
+        self.rotational_index = new_rotation_index
+
+    # --- MÉTHODES PRIVÉES ---
+    def _direction_positive_rotation(
+                                self,direction: Tuple[int, int, int]
+                                ) -> Tuple[int, int, int]:
         """Return the rotated direction with a angle of +60°
 
         Args:
