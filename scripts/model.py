@@ -389,7 +389,15 @@ class Deck:
         Args:
             dict_tile (dict): 
                 dict containing information for Tile initialisation
+        Raises:.
+            TypeError: If the provided dict_tile is not a dictionary.
         """
+
+        # Ensure the input is a dictionary
+        if not isinstance(dict_tile, dict):
+            raise TypeError("Expected a dictionary for dict_tile, got "
+                            f"{type(dict_tile).__name__}.")
+
         return Tile(
             kind=dict_tile['kind'],
             army_name=dict_tile['army_name'],
@@ -411,40 +419,77 @@ class Deck:
 
 
 class Hand:
-    """Describe the hand of a player
+    """
+    Describe the hand of a player in the game. These are the tiles drawn
+    by the player at the start of a turn.
+    
+    Attributes
+    ----------
+        hand_tiles (List[Tile] = []):
+            The tiles currently in the player's hand.
+    
+    Methods
+    ----------
+        add_tile(self, tile: Tile) -> None:
+            add a tile in hand
+
+        discard_tile(self, tiles: List[Tile]) -> None:
+            remove tiles from the hand.
+
+        get_tile_by_id(self, id_tile : str) -> Tile:
+            Return a tile from the hand according to the id tile
     """
     def __init__(self):
-        self.tiles = []
+        self.hand_tiles: List[Tile] = []
 
     def add_tile(self, tile: Tile) -> None:
-        """add a tile in the hand
+        """
+        add a tile in the hand.
 
         Args:
             tile (Tile): Tile to add in the hand
+        Raises:.
+            ValueError: If the hand contains already three tiles.
         """
-        self.tiles.append(tile)
+        if len(self.hand_tiles)>3:
+            raise ValueError("Cannot add more than 3 tiles to the hand.")
+        self.hand_tiles.append(tile)
 
-    def discard_tile(self, tiles: List[Tile]):
-        """remove a tile from the hand
+    def discard_tile(self, tiles: List[Tile]) -> None:
+        """
+        remove tiles from the hand.
 
         Args:
-            index (int): index to remove
+            tiles (List[Tile]): List of tiles to remove
+
+        Raises:.
+            ValueError: If tile not found in hand
         """
         for tile in tiles:
-            self.tiles.remove(tile)
+            if tile in self.hand_tiles:
+                self.hand_tiles.remove(tile)
+            else:
+                raise ValueError(f"Tile {tile.id_tile} not found in hand.")
 
-    def get_tile_by_id(self, id_tile : str) -> Tile|None:
-        """get a tile from the hand according to the id tile
+    def get_tile_by_id(self, id_tile : str) -> Tile:
+        #Non used, maybe delete this methos
+        """
+        Return a tile from the hand according to the id tile
 
         Args:
             id_tile (str): id tile
 
         Returns:
             Tile: tile corresponding to the id tile
+
+        Raises:.
+            ValueError: If tile not found in hand
         """
-        for tile in self.tiles:
+        for tile in self.hand_tiles:
             if tile.id_tile == id_tile:
                 return tile
+        else:
+            raise ValueError(f"Tile {tile.id_tile} not found in hand.")
 
 class Player:
     """Describe a player with his hand and his deck
@@ -460,7 +505,7 @@ class Player:
     def get_tiles(self, number_tiles_to_get: int) -> None:
         """get tiles in hand player
         """
-        nb_tiles_in_hand = len(self.hand.tiles)
+        nb_tiles_in_hand = len(self.hand.hand_tiles)
         nb_tiles_to_draw = number_tiles_to_get - nb_tiles_in_hand
 
         if nb_tiles_to_draw != 0:
@@ -477,8 +522,8 @@ class Player:
             id_tiles_to_keep (List): List of id tile
         """
         tiles_to_discard = []
-        if len(self.hand.tiles)>0:
-            for tile in self.hand.tiles:
+        if len(self.hand.hand_tiles)>0:
+            for tile in self.hand.hand_tiles:
                 if tile.id_tile not in id_tiles_to_keep:
                     tiles_to_discard.append(tile)
 
