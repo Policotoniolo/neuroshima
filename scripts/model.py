@@ -2,7 +2,11 @@ import random
 import importlib
 from dataclasses import dataclass, field
 
-from typing import List, Literal, Tuple, Optional
+from typing import List, Literal, Tuple, Optional, Dict
+
+from config import CUBE_DIRECTION_VECTORS
+from functions import raise_wrong_cube_coordinate
+
 
 @dataclass
 class Tile:
@@ -558,74 +562,167 @@ class Player:
 
 
 class HexBoard():
-    """Describe the model Board
     """
-    def __init__(self, board_limit: int, cube_direction_vectors: list[Tuple[int, int, int]], armies: List[str]) -> None:
+    Represents the game board in a hexagonal grid system.
+    
+    Attributes
+    ----------
+        board_limit (Literal[3, 4]): 
+            The size of the board, defined as the number of hexagons
+            from the center to the outermost edge.
+        armies (List[str]):
+            Names of the armies participating in the game
+        cube_direction_vectors (List[Tuple]):
+            Predefined vectors used to calculate adjacent hexagonal
+            coordinates.
+        tiles (Dict[str,List[Tile]]):
+            Tracks all tiles on the board for each army. Keys are army
+            names, and values are lists of `Tile` objects
+        hexes (List[Tuple[int, int, int]]):
+            Contains all valid hexagonal positions on the board in cubic
+            coordinates.
+        occupied (Dict[str,List[Tuple[int, int, int]]]):
+            Tracks occupied positions for each army. Keys are army
+            names, and values are lists of occupied positions.
+        position_index (Dict[str,Dict[Tuple[int, int, int],Tile]]):
+            Maps positions to tiles for each army. Keys are army names,
+            and values are dictionaries with positions as keys and
+            `Tile` objects as values.
+    
+    Methods
+    ----------
+        add_tile_to_board(self, tile: Tile) -> None:
+            Add a tile to the board if not already on the board, do
+            nothing else.
+            If the position is invalid raises an exception.
+        remove_tile_from_board(self, id_tile: str) -> None:
+            Removes a tile from the board by its ID. If the tile is not
+            found, raises an exception.
+        find_army_tile_at_position(self,\
+                                    army_name: str,
+                                    position: Tuple[int, int, int]
+                                    ) -> Optional[Tile]:
+            Finds and returns the tile belonging to a specific army at
+            a given position. Returns `None` if no tile is found
+        find_any_tile_at_position(self,  position: Tuple[int, int, int]\
+                                    ) -> Optional[Tile]:
+            Finds and returns a tile from any army at the specified
+            position. Returns `None` if no tile is found.
+        create_board(self) -> None:
+            Initializes the board by generating all valid positions
+            based on the `board_limit`.
+    """
+    def __init__(self,
+                board_limit: Literal[3, 4],
+                armies: List[str]
+            ) -> None:
+
+        if board_limit not in [3,4]:
+            raise ValueError("board_limit must be 3 or 4")
+        if len(armies) < 2:
+            raise ValueError("At least two armies must be specified.")
+
         self.board_limit = board_limit
-        self.cube_direction_vectors = cube_direction_vectors
+        self.cube_direction_vectors: List[Tuple] = CUBE_DIRECTION_VECTORS
         self.armies = armies
-        self.tiles = {armies[0]:[], armies[1]:[]}
-        self.hexes = []
-        self.occupied = {armies[0]:[], armies[1]:[]}
+        self.tiles: Dict[str,List[Tile]]\
+            = {army: [] for army in armies}
+        self.hexes: List[Tuple[int, int, int]] = []
+        self.occupied: Dict[str,List[Tuple[int, int, int]]]\
+            = {army: [] for army in armies}
+        self.position_index: Dict[str,Dict[Tuple[int, int, int],Tile]]\
+            = {army: {} for army in self.armies}
 
 
-    def add_tile_to_board(self, tile: Tile|None):
-        """add a tile to the board. Do notthing if tile is None
+    def add_tile_to_board(self, tile: Tile) -> None:
+        """
+        Add a tile to the board if not already on the board, do
+        nothing else.
 
         Args:
-            tile (Tile): Instace of Tile Class
+            tile (Tile): Tile to add
+        Raises:
+            ValueError: If the tile argument is not a instance of Tile
+            ValueError: If wrong board position
+            ValueError: If the position is already occupied
         """
-        if tile is None:
-            return
-        army = tile.army_name
-        if tile in self.tiles[army]:
-            return
-        self.occupied[army].append(tile.board_position)
-        self.tiles[army].append(tile)
+        if not isinstance(tile, Tile):
+            raise ValueError("tile is not a Tile instance")
+        if tile.board_position not in self.hexes:
+            raise ValueError(
+                f"tile position not on the board: {tile.board_position}"
+            )
 
-    def remove_tile_from_board(self, id_tile: str):
-        """remove a tile from the board
+        if tile in self.tiles[tile.army_name]:
+            return
+
+        if tile.board_position in self.occupied[tile.army_name]:
+            raise ValueError(
+                    f"Position {tile.board_position} is already occupied."
+                )
+
+        self.occupied[tile.army_name].append(tile.board_position)
+        self.tiles[tile.army_name].append(tile)
+        self.position_index[tile.army_name][tile.board_position] = tile
+
+    def remove_tile_from_board(self, id_tile: str) -> None:
+        """
+        Removes a tile from the board by its ID.
 
         Args:
-            id_tile (int): id of the tile
+            id_tile (int): ID of the tile
+        Raises:
+            ValueError: If the tile with the given ID is not found.
         """
-        for index, tile in enumerate(self.tiles[self.armies[0]]):
-            if tile.id_tile == id_tile:
-                self.occupied[self.armies[0]].remove(tile.board_position)
-                self.tiles[self.armies[0]].pop(index)
-                return
-        for index, tile in enumerate(self.tiles[self.armies[1]]):
-            if tile.id_tile == id_tile:
-                self.occupied[self.armies[1]].remove(tile.board_position)
-                self.tiles[self.armies[1]].pop(index)
-                return
+        for army in self.armies:
+            for index, tile in enumerate(self.tiles[army]):
+                if tile.id_tile == id_tile:
+                    self.occupied[army].remove(tile.board_position)
+                    self.tiles[army].pop(index)
+                    del self.position_index[army][tile.board_position]
+                    return
+        raise ValueError(f"No tile with ID '{id_tile}' found on the board.")
 
-    def find_army_tile_at_position(self, army_name: str, position: Tuple[int, int, int]) -> Tile|None:
-        """get a tile of a specific army from the board according to the position
+    def find_army_tile_at_position(self,
+                                army_name: str,
+                                position: Tuple[int, int, int]
+                            ) -> Optional[Tile]:
+        """
+        Finds and returns the tile belonging to a specific army at
+        a given position. Returns `None` if no tile is found
 
         Args:
             army_name (str): Name of the army
             position: Position of the tile to get. Cubique coordinates
+        Raises:
+            ValueError : if position not good
         """
-        for tile in self.tiles[army_name]:
-            if tile.board_position == position:
-                return tile
-        return None
+        raise_wrong_cube_coordinate(position)
+        tile = self.position_index[army_name].get(position)
+        return tile
 
-    def find_any_tile_at_position(self,  position: Tuple[int, int, int]) -> Tile|None:
-        """get a tile of all army from the board according to the position
+    def find_any_tile_at_position(self,  position: Tuple[int, int, int]
+                                ) -> Optional[Tile]:
+        """
+        Finds and returns a tile from any army at the specified
+        position. Returns `None` if no tile is found.
 
         Args:
             id_tile (int): id of the tile
+        Raises:
+            ValueError : if position not good
         """
+        raise_wrong_cube_coordinate(position)
         for army_name in self.armies:
-            for tile in self.tiles[army_name]:
-                if tile.board_position == position:
-                    return tile
+            tile = self.position_index[army_name].get(position)
+            if tile:
+                return tile
         return None
 
-    def create_board(self):
-        """Create the hexa board
+    def create_board(self) -> None:
+        """
+        Initializes the board by generating all valid positions
+        based on the `board_limit`.
         """
         self.hexes = []
         index = 0
@@ -650,8 +747,6 @@ class HexBoard():
 
                     self.hexes.append((x,y,z))
                     index += 1
-
-        self.hexes = tuple(self.hexes)
 
 
 if __name__ == "__main__":
