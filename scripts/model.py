@@ -301,67 +301,113 @@ class Tile:
 
 
 class Deck:
-    """Class representing a deck
+    """Represents a deck of tiles for a specific army in the game.
+
+    Attributes
+    ----------
+        army_name (str): The name of the army associated with this deck.
+        tiles (List[Tile]): The list of tiles in the deck.
+        defausse (List[Tile]): The discard pile for removed tiles
+    
+    Methods
+    ----------
+        shuffle_deck(self) -> None:
+            Shuffles the tiles list deck.
+
+        init_deck(self) -> None:
+            Initializes the deck tiles list.
+
+        remove_top_deck_tile(self) -> Optional[Tile]:
+            Removes and returns the top tile from the deck.
+
+    Private Methods
+    ----------
+    _get_army(self) -> List[dict]:
+        Dynamically imports the army data module and return a list of
+        dict representing the army's tiles.
+
+
+    _dict_to_tile(self, dict_tile: dict) -> Tile:
+        Converts a dictionary representation of a tile into a Tile
+        object.
     """
+
     def __init__(self, army_name: str):
-        self.tiles = []
+        self.tiles: List[Tile] = []  # Main deck
         self.army_name = army_name
-        self.defausse = []
-
-
-    def _get_army(self) -> List[dict]:
-        """Get army from armies file and return a list of dicts.
-        Each dict represente a tile
-
-        Returns:
-            List[dict]: _description_
-        """
-
-        modulename = "armies"
-        submodulename = self.army_name
-        what = self.army_name
-        module = importlib.import_module(modulename + "." + submodulename)
-        army = getattr(module,what)
-
-        return army
+        self.defausse: List[Tile] = []  # Discard pile
 
     def shuffle_deck(self) -> None:
-        """shuffle the deck
-        """
+        """Shuffles the tiles list deck."""
         random.shuffle(self.tiles)
 
     def init_deck(self) -> None:
-        """collect and add tiles from the army in the deck
-        """
+        """Initializes the deck tiles list."""
         army = self._get_army()
+        self.tiles = [self._dict_to_tile(tile_dict) for tile_dict in army]
 
-        for dict_tile in army:
-            self.tiles.append(
-                Tile(
-                    kind=dict_tile['kind'],
-                    army_name=dict_tile['army_name'],
-                    id_tile=dict_tile['id_tile'],
-                    initiative=dict_tile['initiative'],
-                    range_attacks_direction=dict_tile['range_attacks_direction'],
-                    range_attacks_power=dict_tile['range_attacks_power'],
-                    cac_attacks_direction=dict_tile['cac_attacks_direction'],
-                    cac_attacks_power=dict_tile['cac_attacks_power'],
-                    net_directions=dict_tile['net'],
-                    life_point=dict_tile['life_point'],
-                    shields_directions=dict_tile['shields_position'],
-                    special_capacities=dict_tile['special_capacities'],
-                    module=dict_tile['module'],
-                    action=dict_tile['action'],
-                    url_image=dict_tile['url_image'],
-                    board_position = (-1,-1,-1) # init with impossible cube position
-                ))
+    def remove_top_deck_tile(self) -> Optional[Tile]:
+        """Removes and returns the top tile from the deck.
 
-    def remove_top_deck_tile(self) -> Tile|None:
-        """Return the first tile from the deck and remove it.
-        First tile of deck is HQ if not shuffle
+        Returns:
+            Optional[Tile]:
+                The removed tile, or None if the deck is empty.
         """
-        if self.tiles:
-            return self.tiles.pop(0)
+        return self.tiles.pop(0) if self.tiles else None
+
+    # --- MÉTHODES PRIVÉES ---
+
+    def _get_army(self) -> List[dict]:
+        """
+        Dynamically imports the army data module and return a list of
+        dict representing the army's tiles.
+
+        Returns:
+            List[dict]: List of dictionaries representing the army's
+            tiles.
+
+        Raises:
+            ValueError: If the army module or attribute is not found.
+        """
+        try:
+            module = importlib.import_module(f"armies.{self.army_name}")
+            army = getattr(module, self.army_name)
+        except ModuleNotFoundError:
+            raise ValueError(
+                f"Army module '{self.army_name}' not found."
+            )
+        except AttributeError:
+            raise ValueError(
+                f"Army '{self.army_name}' not defined in the module."
+            )
+        return army
+
+    def _dict_to_tile(self, dict_tile: dict) -> Tile:
+        """
+        Converts a dictionary representation of a tile into a Tile
+        object.
+        Args:
+            dict_tile (dict): 
+                dict containing information for Tile initialisation
+        """
+        return Tile(
+            kind=dict_tile['kind'],
+            army_name=dict_tile['army_name'],
+            id_tile=dict_tile['id_tile'],
+            initiative=dict_tile['initiative'],
+            range_attacks_direction=dict_tile['range_attacks_direction'],
+            range_attacks_power=dict_tile['range_attacks_power'],
+            cac_attacks_direction=dict_tile['cac_attacks_direction'],
+            cac_attacks_power=dict_tile['cac_attacks_power'],
+            net_directions=dict_tile['net'],
+            life_point=dict_tile['life_point'],
+            shields_directions=dict_tile['shields_position'],
+            special_capacities=dict_tile['special_capacities'],
+            module=dict_tile['module'],
+            action=dict_tile['action'],
+            url_image=dict_tile['url_image'],
+            board_position=(-1, -1, -1)  # Default invalid position
+        )
 
 
 class Hand:
