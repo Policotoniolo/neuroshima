@@ -54,7 +54,7 @@ class GameController:
             player (Player): Player class
         """
         id_tiles = []
-        for tile in player.hand.tiles:
+        for tile in player.hand.hand_tiles:
             id_tiles.append(tile.id_tile)
         return id_tiles
 
@@ -363,7 +363,7 @@ class GameController:
                 if self.view.endbutton.isvalidated(event_list):
                     run = False
                     self.view.hand_tile_to_board()
-                    player.discard_tiles_hand(id_tiles_to_keep=[])
+                    player.discard_tiles_hand()
                     self.update_board_model()
 
             player.deck.shuffle_deck()

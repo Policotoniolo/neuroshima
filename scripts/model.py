@@ -492,42 +492,69 @@ class Hand:
             raise ValueError(f"Tile {tile.id_tile} not found in hand.")
 
 class Player:
-    """Describe a player with his hand and his deck
-    Args:
+    """Describe a player with his hand and his deck.
+    Attributes
+    ----------
         name (str): player name
         army_name (str): army name
+    Methods
+    ----------
+        get_tiles(self, number_tiles_wanted: int) -> None:
+            Get the number of tile wanted in hand.
+            Check the tiles already in hand.
+        discard_tiles_hand(self, id_tiles_to_keep: List = []):
+            Discard tiles from Hand player but keep in hand some tiles
+            if the player wants.
+
     """
     def __init__(self, name: str, army_name: str):
         self.name = name
         self.hand = Hand()
         self.deck = Deck(army_name)
 
-    def get_tiles(self, number_tiles_to_get: int) -> None:
-        """get tiles in hand player
+    def get_tiles(self, number_tiles_wanted: Literal[1, 2, 3]) -> None:
         """
-        nb_tiles_in_hand = len(self.hand.hand_tiles)
-        nb_tiles_to_draw = number_tiles_to_get - nb_tiles_in_hand
-
-        if nb_tiles_to_draw != 0:
-            for i in range (0, nb_tiles_to_draw) :
-                tile = self.deck.remove_top_deck_tile()
-                if tile is not None:
-                    self.hand.add_tile(tile)
-                i+=1
-
-    def discard_tiles_hand(self, id_tiles_to_keep: List):
-        """discard tiles from Hand player
+        Draw the desired number of tiles into the hand, ensuring the
+        maximum hand size is not exceeded.
 
         Args:
-            id_tiles_to_keep (List): List of id tile
-        """
-        tiles_to_discard = []
-        if len(self.hand.hand_tiles)>0:
-            for tile in self.hand.hand_tiles:
-                if tile.id_tile not in id_tiles_to_keep:
-                    tiles_to_discard.append(tile)
+            number_tiles_wanted (int): Desired number of tiles.
+        Raises:
+            ValueError: If the requested number exceeds the hand limit.
 
-            self.deck.defausse.append(self.hand.discard_tile(tiles_to_discard))
+        """
+        if number_tiles_wanted > 3:
+            raise ValueError(
+                        "Cannot have more than 3 tiles to the hand."
+                    )
+        
+        nb_tiles_in_hand = len(self.hand.hand_tiles)
+        nb_tiles_to_draw = number_tiles_wanted - nb_tiles_in_hand
+
+        if nb_tiles_to_draw != 0:
+            for _ in range (nb_tiles_to_draw) :
+                tile = self.deck.remove_top_deck_tile()
+                if tile:
+                    self.hand.add_tile(tile)
+
+    def discard_tiles_hand(self, id_tiles_to_keep: List[str] = []) -> None:
+        """
+        Discard tiles from the player's hand while optionally keeping
+        specific tiles.
+
+        Args:
+            id_tiles_to_keep (List): IDs of tiles to keep in hand.
+        """
+        if len(self.hand.hand_tiles) == 0:
+            return
+        
+        tiles_to_discard = [
+                        tile for tile in self.hand.hand_tiles
+                        if tile.id_tile not in id_tiles_to_keep
+                        ]
+
+        self.hand.discard_tile(tiles_to_discard)
+        self.deck.defausse.extend(tiles_to_discard)
 
 
 class HexBoard():
