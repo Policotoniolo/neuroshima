@@ -2,7 +2,8 @@ from typing import Tuple, List, TypeVar
 
 from scripts.config import (BOARD_PIXEL_TO_CUBE,
                         CUBE_DIRECTION_VECTORS,
-                        DISPLAY_SIZE
+                        DISPLAY_SIZE,
+                        BOARD_LIMIT
                     )
 
 
@@ -138,7 +139,8 @@ def calculate_position(start_position: Tuple[int, int, int],
         print(f"Error: {ve}")
         raise
 
-def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int]
+def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int],
+                                board_limit= BOARD_LIMIT
                         ) -> None:
     """Validates a cube coordinate in a hexagonal
         grid system and raises a ValueError if invalid.
@@ -148,10 +150,17 @@ def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int]
                                                 to validate.
 
     Raises:
-        ValueError: Not a tuple.
-        ValueError: Does not contain exactly three elements.
-        ValueError: Contains non-integer elements
-        ValueError: The sum of the three elements is not zero.
+        ValueError: 
+            Not a tuple.
+        ValueError:
+            Does not contain exactly three elements.
+        ValueError:
+            Contains non-integer elements
+        ValueError:
+            The sum of the three elements is not zero.
+        ValueError:
+            The position is outside the board according to the
+            Value BOARD_LIMIT
     """
 
     if not isinstance(cube_coordinate, tuple):
@@ -169,6 +178,10 @@ def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int]
     if not sum(cube_coordinate) == 0:
         raise ValueError("The sum of the three coordinates is not \
                     equal to 0.")
+
+    if not all(abs(x) > board_limit for x in cube_coordinate):
+        raise ValueError(f"The position {cube_coordinate} is outside \
+                    of the board")
 
 def raise_wrong_pixel_coordinate(pixel_coordinate: Tuple[int, int]
                         ) -> None:
