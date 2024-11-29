@@ -220,7 +220,7 @@ class BattleEvaluator:
         """Removes tiles from the board that have zero or negative life points."""
         for army in self.board.armies:
             for tile in self.board.tiles[army]:
-                if tile.life_point < 0:
+                if tile.life_point and tile.life_point < 0:
                     self.board.remove_tile_from_board(tile.id_tile)
 
     def battle_round(self,
@@ -262,7 +262,7 @@ class BattleEvaluator:
         """Return the highest initiative among all tiles on the board."""
         return max(
             max(tilemodel.initiative) for army in self.board.armies
-            for tilemodel in self.board.tiles[army]
+            for tilemodel in self.board.tiles[army] if tilemodel.initiative
         )
 
     def _get_enemy_army(self, army_name: str) -> str:
@@ -381,8 +381,8 @@ class BattleEvaluator:
                 range_attack_position
             )
             if enemy_tilemodel and enemy_tilemodel.life_point:
-                if enemy_tilemodel.shields_position:
-                    for shield in enemy_tilemodel.shields_position:
+                if enemy_tilemodel.shields_directions:
+                    for shield in enemy_tilemodel.shields_directions:
                         if range_attack_direction == \
                                 tuple([z * -1 for z in shield]):
                             shield_point = 1
