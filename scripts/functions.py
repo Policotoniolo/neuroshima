@@ -1,6 +1,6 @@
 from typing import Tuple, List, TypeVar
 
-from scripts.config import (BOARD_PIXEL_TO_CUBE,
+from config import (BOARD_PIXEL_TO_CUBE,
                         CUBE_DIRECTION_VECTORS,
                         DISPLAY_SIZE,
                         BOARD_LIMIT
@@ -16,7 +16,7 @@ def coordinates_cube_to_pixel(cube_coordinate: Tuple[int, int, int]
         cube_coordinates (Tuple[int, int, int]): Cube coordinates.
 
     Returns:
-        Tuple[int, int]: Corresponding pixel position.
+        pixel_position (Tuple[int, int]): Corresponding pixel position.
 
     Raises:
         KeyError:   If the cube coordinates do not 
@@ -35,10 +35,10 @@ def coordinates_pixel_to_cube(pixel_position: Tuple[int, int]
     """Transform pixels position into cube coordinates 
 
     Args:
-        pixel_position (tuple): pixel position
+        pixel_position (Tuple[int, int]): pixel position
 
     Returns:
-        Tuple: Cube coordinates
+        cube_position (Tuple[int, int, int]): Cube coordinates
     Raises:
         KeyError:   If the pixel coordinates do not match 
                     any cube position.
@@ -76,15 +76,18 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
     Calculate the neighboring cube coordinates for a given position.
 
     Args:
-        cube_coordinates (Tuple[int, int, int]): The initial cube coordinate.
+        cube_coordinates (Tuple[int, int, int]):
+            The initial cube coordinate.
 
     Returns:
-        List[Tuple[int, int, int]]: List of neighboring cube coordinates.
+        List[Tuple[int, int, int]]:
+            List of neighboring cube coordinates.
     """
     try: 
         # Validate input types and lengths
         raise_wrong_cube_coordinate(cube_coordinates)
-        # Not doing a loop because of pylint which is returning a ReturnTypeError if so.
+        # Not doing a loop because of pylint which is returning a
+        # ReturnTypeError if so.
         neighbors = [(
                 cube_coordinates[0] + direction[0],
                 cube_coordinates[1] + direction[1],
@@ -100,6 +103,19 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
 
 def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
                     ) -> List[Tuple[int, int]]:
+    """Transforms a list of cube coordinates into a list of  pixel
+    positions.
+
+    Args:
+        list_cube_coordinates (List[Tuple[int, int, int]]): 
+            List of cube coordinates
+
+    Raises:
+        KeyError: If pixel position not valide
+
+    Returns:
+        List[Tuple[int, int]]:  List of pixel coordinates
+    """
     try:
         # Validate input types and lengths
         [raise_wrong_cube_coordinate(x) for x in list_cube_coordinates]
@@ -116,21 +132,26 @@ def calculate_position(start_position: Tuple[int, int, int],
                     direction: Tuple[int, int, int]
                     ) -> Tuple[int, int, int]:
     """
-    Calculates the new position on a hexagonal grid by applying a directional offset.
+    Calculates the new position on a hexagonal grid by applying a
+    directional offset.
 
     Args:
-        start_position (Tuple[int, int, int]): The starting position in cube coordinates.
-        direction (Tuple[int, int, int]): The directional vector in cube coordinates.
+        start_position (Tuple[int, int, int]):
+            The starting position in cube coordinates.
+        direction (Tuple[int, int, int]):
+            The directional vector in cube coordinates.
 
     Returns:
-        Tuple[int, int, int]: The resulting position after adding the direction 
-                            to the start position.
+        new_position (Tuple[int, int, int]):
+            The resulting position after adding the direction to the
+            start position.
     """
     try:
         # Validate input types and lengths
         raise_wrong_cube_coordinate(start_position)
         raise_wrong_cube_coordinate(direction)
-        # Not doing a loop because of pylint which is returning a ReturnTypeError if so.
+        # Not doing a loop because of pylint which is returning a
+        # ReturnTypeError if so.
         return (start_position[0] + direction[0],
                 start_position[1] + direction[1],
                 start_position[2] + direction[2])
