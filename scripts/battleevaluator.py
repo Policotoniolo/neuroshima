@@ -145,6 +145,15 @@ class BattleEvaluator:
                 module_evaluator: ModuleEvaluator,
                 view: View
                 ) -> None:
+        """
+        Initializes the evaluator with a game board and module 
+        evaluator and view
+
+        Args:
+            board (HexBoard): Game Board 
+            module_evaluator (ModuleEvaluator): Module Evaluator
+            view (View): Class for prompt and player interactions
+        """
         self.board = board
         self.module_evaluator = module_evaluator
         self.view = view
