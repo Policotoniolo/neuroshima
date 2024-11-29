@@ -6,21 +6,24 @@ from functions import next_element, calculate_position
 
 class ModuleEvaluator:
     """
-    This class evaluates and manages effects of game modules on tiles of a `HexBoard`.
-    It is esponsible for applying, cleaning, 
-    and managing module effects on a hexagonal game board.
+    This class evaluates and manages effects of game modules on tiles of
+    a `HexBoard`. It is esponsible for applying, cleaning, and managing
+    module effects on a hexagonal game board.
 
     Modules can be divided into 3 categories:
-        - Modules with priority : this module effects have to be applied in first. 
-        For exemple for modules taking control of enemy units
-        - Modules with active effects : this modules effect have a impact ouside a battle (not like initiative)
-        For exemple a module giving movement to friendly unit
-        - Modules with non priority : "Classic" effect used only for battle, like initiative bonus, damage bonus.
+        - Modules with priority : this module effects have to be applied
+        in first. For exemple for modules taking control of enemy units.
+        - Modules with active effects : this modules effect have a
+        impact ouside a battle (not like initiative). For exemple a
+        module giving movement to friendly unit.
+        - Modules with non priority : "Classic" effect used only for
+        battle, like initiative bonus, damage bonus.
 
     
     Attributes
     ----------
-        board (HexBoard): The game board containing tiles and army information.
+        board (HexBoard):
+            The game board containing tiles and army information.
 
     Methods
     ----------
@@ -28,7 +31,8 @@ class ModuleEvaluator:
             Initializes the evaluator with a game board.
 
         apply_all_effect_modules() -> None:
-            Applies priority and non-priority module effects for all armies
+            Applies priority and non-priority module effects for all
+            armies
 
         clean_all_effect_modules() -> None:
             Cleans all module effects from all tiles on the board.
@@ -41,17 +45,21 @@ class ModuleEvaluator:
 
     Private Methods
     ----------
-        _apply_one_effect_on_tile(tilemodel: Tile, effect_type: str) -> None:
+        _apply_one_effect_on_tile(tilemodel: Tile, effect_type: str\
+            ) -> None:
             Applies a specific effect to a tile based on its type.
 
-        _clean_one_effect_on_tile(tilemodel: Tile, effect_type: str) -> None:
+        _clean_one_effect_on_tile(tilemodel: Tile, effect_type: str\
+            ) -> None:
             Clean a specific effect from a tile based on its type.
 
         _apply_<effect_name>_effect_on_tile(tilemodel: Tile) -> None:
-            Applies a specific type of module effect (e.g., "medic", "range_augment").
+            Applies a specific type of module effect (e.g., "medic",
+            "range_augment").
         
         _clean_<effect_name>_effect_on_tile(tilemodel: Tile) -> None:
-            Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+            Cleans a specific type of module effect from a tile (e.g.,
+            "medic", "range_augment").
 
         _apply_prio_effect_modules_army(army_name: str) -> None:
             Applies priority module effects for a given army.
@@ -59,21 +67,26 @@ class ModuleEvaluator:
         _apply_non_prio_effect_modules_army(army_name: str) -> None:
             Applies non priority module effects for a given army.
 
-        _get_effects_modules(modules: List[Tile]) -> Tuple[List[str], List[List[Position]]]:
-            Retrieves module effects and affected positions from a list of module tiles.
+        _get_effects_modules(modules: List[Tile]) -> Tuple[List[str], \
+            List[List[Position]]]:
+            Retrieves module effects and affected positions from a list
+            of module tiles.
 
         _get_prio_army_modules(army_name: str) -> List[Tile]:
-            Returns a list of priority module tiles for the specified army.
+            Returns a list of priority module tiles for the specified
+            army.
 
         _get_non_prio_army_modules(army_name: str) -> List[Tile]:
-            Returns a list of non priority module tiles for the specified army.
+            Returns a list of non priority module tiles for the
+            specified army.
 
         _get_active_army_modules(army_name: str) -> List[Tile]:
             Returns a list of active modules for the specified army.
     """
 
     def __init__(self, board: HexBoard) -> None:
-        """Initializes the evaluator with a game board.
+        """
+        Initializes the evaluator with a game board.
 
         Args:
             board (HexBoard): Game Board
@@ -81,7 +94,8 @@ class ModuleEvaluator:
         self.board = board
 
     def apply_all_effect_modules(self):
-        """Applies priority and non-priority module effects for all armies
+        """Applies priority and non-priority module effects for all
+        armies
         """
         for army_name in self.board.armies:
             self._apply_prio_effect_modules_army(army_name)
@@ -123,7 +137,9 @@ class ModuleEvaluator:
 # --- MÉTHODES PRIVÉES ---
 
     def _apply_medic_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -131,7 +147,9 @@ class ModuleEvaluator:
         tilemodel.module_effects.append("medic")
 
     def _apply_cac_augment_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -144,7 +162,9 @@ class ModuleEvaluator:
             )
 
     def _apply_range_augment_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -156,8 +176,11 @@ class ModuleEvaluator:
                     1 for range_attack_power in tilemodel.range_attacks_power]
             )
 
-    def _apply_initiative_augment_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+    def _apply_initiative_augment_effect_on_tile(self, tilemodel: Tile
+                                                ) -> None:
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -170,7 +193,9 @@ class ModuleEvaluator:
 
     def _apply_double_initiative_effect_on_tile(self, tilemodel: Tile
                                                 ) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -182,7 +207,9 @@ class ModuleEvaluator:
             tilemodel.initiative.append(new_init)
 
     def _apply_saboteur_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -193,7 +220,9 @@ class ModuleEvaluator:
                 tilemodel.initiative[index] = init-1
 
     def _apply_scoper_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -206,7 +235,9 @@ class ModuleEvaluator:
             self.board.add_tile_to_board(tilemodel)
 
     def _apply_quartiermaitre_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Applies a specific type of module effect (e.g., "medic", "range_augment").
+        """
+        Applies a specific type of module effect (e.g., "medic",
+        "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -241,7 +272,9 @@ class ModuleEvaluator:
             self._apply_quartiermaitre_effect_on_tile(tilemodel)
 
     def _get_prio_army_modules(self, army_name: str) -> List[Tile]:
-        """Returns a list of priority module tiles for the specified army.
+        """
+        Returns a list of priority module tiles for the specified
+        army.
 
         Args:
             army_name (str): Name of the army
@@ -258,14 +291,17 @@ class ModuleEvaluator:
 
     def _get_effects_modules(self, modules: List[Tile]) \
             -> Tuple[List[str], List[Tuple[int, int, int]]]:
-        """Retrieves module effects and affected positions from a list of module tiles.
+        """
+        Retrieves module effects and affected positions from a list
+        of module tiles.
 
         Args:
             modules (List[Tile]): List of modules
 
         Returns:
             Tuple[List[str], List[Tuple[int, int, int]]]: 
-            list of effects and list of cube position where applied the effect. 
+            list of effects and list of cube position where applied the
+            effect. 
             The two indexes of the two list match
         """
         effects = []
@@ -282,10 +318,13 @@ class ModuleEvaluator:
                     effects.extend([effect_type] * len(affected_position))
                     effect_positions.extend(affected_position)
         return effects, effect_positions
-        # Attention les deux listes n'ont pas toujours la même taille (faire un test)
+        # Attention les deux listes n'ont pas toujours la même taille 
+        # (faire un test)
 
     def _get_non_prio_army_modules(self, army_name: str) -> List[Tile]:
-        """Returns a list of non priority module tiles for the specified army.
+        """
+        Returns a list of non priority module tiles for the specified
+        army.
 
         Args:
             army_name (str): Name of the army
@@ -350,7 +389,9 @@ class ModuleEvaluator:
                 self._apply_one_effect_on_tile(tile, effect_non_prio)
 
     def _clean_medic_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -358,7 +399,9 @@ class ModuleEvaluator:
         tilemodel.module_effects.remove("medic")
 
     def _clean_cac_augment_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -373,7 +416,9 @@ class ModuleEvaluator:
         )
 
     def _clean_range_augment_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -387,7 +432,9 @@ class ModuleEvaluator:
 
     def _clean_initiative_augment_effect_on_tile(self,
                                                 tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -400,7 +447,9 @@ class ModuleEvaluator:
 
     def _clean_double_initiative_effect_on_tile(self,
                                                 tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -411,7 +460,9 @@ class ModuleEvaluator:
             tilemodel.initiative.remove(min_init)
 
     def _clean_saboteur_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -422,7 +473,9 @@ class ModuleEvaluator:
                 tilemodel.initiative[index] = init+1
 
     def _clean_scoper_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
@@ -435,7 +488,9 @@ class ModuleEvaluator:
             self.board.add_tile_to_board(tilemodel)
 
     def _clean_quartiermaitre_effect_on_tile(self, tilemodel: Tile) -> None:
-        """Cleans a specific type of module effect from a tile (e.g., "medic", "range_augment").
+        """
+        Cleans a specific type of module effect from a tile (e.g., 
+        "medic", "range_augment").
 
         Args:
             tilemodel (Tile): Tile affected
