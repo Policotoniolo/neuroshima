@@ -90,7 +90,7 @@ class Tile:
         _direction_positive_rotation(direction: Tuple[int, int, int]
                                 ) -> Tuple[int, int, int]:
             Rotates a direction vector 60° clockwise.
-        
+
         _direction_negative_rotation(direction: Tuple[int, int, int]
                                 ) -> Tuple[int, int, int]:
             Rotates a direction vector 60° counterclockwise.
@@ -134,10 +134,10 @@ class Tile:
     url_image: str
     is_netted: bool = False
     module_effects: List = field(default_factory=list)
-    rotational_index:Literal[0,1,2,3,4,5] = 0
+    rotational_index: Literal[0, 1, 2, 3, 4, 5] = 0
 
-    def rotate_tile(self, new_rotation_index: Literal[0,1,2,3,4,5]
-                ) -> None:
+    def rotate_tile(self, new_rotation_index: Literal[0, 1, 2, 3, 4, 5]
+                    ) -> None:
         """
         generate all the rotation (attacks, shields) of a tile 
         according to a new rotation direction.
@@ -161,8 +161,8 @@ class Tile:
 
     # --- MÉTHODES PRIVÉES ---
     def _direction_positive_rotation(
-                                self,direction: Tuple[int, int, int]
-                                ) -> Tuple[int, int, int]:
+        self, direction: Tuple[int, int, int]
+    ) -> Tuple[int, int, int]:
         """Return the rotated direction with a angle of +60°
 
         Args:
@@ -173,12 +173,12 @@ class Tile:
         Returns:
             Tuple: direction rotated
         """
-        q,r,s = direction
+        q, r, s = direction
         return (-r, -s, -q)
 
     def _direction_negative_rotation(
-                                self,direction: Tuple[int, int, int]
-                                ) -> Tuple[int, int, int]:
+        self, direction: Tuple[int, int, int]
+    ) -> Tuple[int, int, int]:
         """Return the rotated direction with a angle of -60°
 
         Args:
@@ -189,13 +189,13 @@ class Tile:
         Returns:
             Tuple: direction rotated
         """
-        q,r,s = direction
+        q, r, s = direction
         return (-s, -q, -r)
 
     def _directions_rotation(self,
                             directions: List[Tuple[int, int, int]],
                             rotation_diff: int
-                        ) -> List[Tuple[int, int, int]]:
+                            ) -> List[Tuple[int, int, int]]:
         """
         Rotate a list of direction by a speficied number of step 
         (+60° or -60°)
@@ -215,11 +215,11 @@ class Tile:
                 A new list of directions after applying the rotation.
         """
         return [
-                    (
-                    self._direction_positive_rotation(direction)
-                    if rotation_diff > 0
-                    else self._direction_negative_rotation(direction)
-                ) 
+            (
+                self._direction_positive_rotation(direction)
+                if rotation_diff > 0
+                else self._direction_negative_rotation(direction)
+            )
             for _ in range(abs(rotation_diff))
             for direction in directions
         ]
@@ -236,11 +236,11 @@ class Tile:
                 while a negative value indicates
                 counterclockwise rotation.
         """
-        if self.shields_position:
-            self.shields_position = self._directions_rotation(
-                                                self.shields_position,
-                                                rotation_diff
-                                            )
+        if self.shields_directions:
+            self.shields_directions = self._directions_rotation(
+                self.shields_directions,
+                rotation_diff
+            )
 
     def _rotate_attacks(self, rotation_diff: int) -> None:
         """
@@ -256,14 +256,14 @@ class Tile:
         """
         if self.range_attacks_direction:
             self.range_attacks_direction = self._directions_rotation(
-                                        self.range_attacks_direction,
-                                        rotation_diff
-                                    )
+                self.range_attacks_direction,
+                rotation_diff
+            )
         if self.cac_attacks_direction:
             self.cac_attacks_direction = self._directions_rotation(
-                                        self.cac_attacks_direction,
-                                        rotation_diff
-                                    )
+                self.cac_attacks_direction,
+                rotation_diff
+            )
 
     def _rotate_net(self, rotation_diff: int) -> None:
         """
@@ -278,9 +278,9 @@ class Tile:
         """
         if self.net_directions:
             self.net_directions = self._directions_rotation(
-                            self.net_directions,
-                            rotation_diff
-                        )
+                self.net_directions,
+                rotation_diff
+            )
 
     def _rotate_module(self, rotation_diff: int) -> None:
         """
@@ -299,9 +299,9 @@ class Tile:
                 effect_name = list(effect.keys())[0]
                 self.module[index][effect_name] = \
                     self._directions_rotation(
-                            list(effect.values())[0],
-                            rotation_diff
-                        )
+                    list(effect.values())[0],
+                    rotation_diff
+                )
 
 
 class Deck:
@@ -312,7 +312,7 @@ class Deck:
         army_name (str): The name of the army associated with this deck.
         tiles (List[Tile]): The list of tiles in the deck.
         defausse (List[Tile]): The discard pile for removed tiles
-    
+
     Methods
     ----------
         shuffle_deck(self) -> None:
@@ -411,9 +411,9 @@ class Deck:
             range_attacks_power=dict_tile['range_attacks_power'],
             cac_attacks_direction=dict_tile['cac_attacks_direction'],
             cac_attacks_power=dict_tile['cac_attacks_power'],
-            net_directions=dict_tile['net'],
+            net_directions=dict_tile['net_directions'],
             life_point=dict_tile['life_point'],
-            shields_directions=dict_tile['shields_position'],
+            shields_directions=dict_tile['shields_directions'],
             special_capacities=dict_tile['special_capacities'],
             module=dict_tile['module'],
             action=dict_tile['action'],
@@ -426,12 +426,12 @@ class Hand:
     """
     Describe the hand of a player in the game. These are the tiles drawn
     by the player at the start of a turn.
-    
+
     Attributes
     ----------
         hand_tiles (List[Tile] = []):
             The tiles currently in the player's hand.
-    
+
     Methods
     ----------
         add_tile(self, tile: Tile) -> None:
@@ -443,6 +443,7 @@ class Hand:
         get_tile_by_id(self, id_tile : str) -> Tile:
             Return a tile from the hand according to the id tile
     """
+
     def __init__(self):
         self.hand_tiles: List[Tile] = []
 
@@ -455,7 +456,7 @@ class Hand:
         Raises:.
             ValueError: If the hand contains already three tiles.
         """
-        if len(self.hand_tiles)>3:
+        if len(self.hand_tiles) > 3:
             raise ValueError("Cannot add more than 3 tiles to the hand.")
         self.hand_tiles.append(tile)
 
@@ -475,8 +476,8 @@ class Hand:
             else:
                 raise ValueError(f"Tile {tile.id_tile} not found in hand.")
 
-    def get_tile_by_id(self, id_tile : str) -> Tile:
-        #Non used, maybe delete this methos
+    def get_tile_by_id(self, id_tile: str) -> Tile:
+        # Non used, maybe delete this methos
         """
         Return a tile from the hand according to the id tile
 
@@ -495,6 +496,7 @@ class Hand:
         else:
             raise ValueError(f"Tile {tile.id_tile} not found in hand.")
 
+
 class Player:
     """Describe a player with his hand and his deck.
     Attributes
@@ -511,6 +513,7 @@ class Player:
             if the player wants.
 
     """
+
     def __init__(self, name: str, army_name: str):
         self.name = name
         self.hand = Hand()
@@ -529,14 +532,14 @@ class Player:
         """
         if number_tiles_wanted > 3:
             raise ValueError(
-                        "Cannot have more than 3 tiles to the hand."
-                    )
-        
+                "Cannot have more than 3 tiles to the hand."
+            )
+
         nb_tiles_in_hand = len(self.hand.hand_tiles)
         nb_tiles_to_draw = number_tiles_wanted - nb_tiles_in_hand
 
         if nb_tiles_to_draw != 0:
-            for _ in range (nb_tiles_to_draw) :
+            for _ in range(nb_tiles_to_draw):
                 tile = self.deck.remove_top_deck_tile()
                 if tile:
                     self.hand.add_tile(tile)
@@ -551,11 +554,11 @@ class Player:
         """
         if len(self.hand.hand_tiles) == 0:
             return
-        
+
         tiles_to_discard = [
-                        tile for tile in self.hand.hand_tiles
-                        if tile.id_tile not in id_tiles_to_keep
-                        ]
+            tile for tile in self.hand.hand_tiles
+            if tile.id_tile not in id_tiles_to_keep
+        ]
 
         self.hand.discard_tile(tiles_to_discard)
         self.deck.defausse.extend(tiles_to_discard)
@@ -564,7 +567,7 @@ class Player:
 class HexBoard():
     """
     Represents the game board in a hexagonal grid system.
-    
+
     Attributes
     ----------
         board_limit (Literal[3, 4]): 
@@ -588,7 +591,7 @@ class HexBoard():
             Maps positions to tiles for each army. Keys are army names,
             and values are dictionaries with positions as keys and
             `Tile` objects as values.
-    
+
     Methods
     ----------
         add_tile_to_board(self, tile: Tile) -> None:
@@ -612,12 +615,13 @@ class HexBoard():
             Initializes the board by generating all valid positions
             based on the `board_limit`.
     """
+
     def __init__(self,
                 board_limit: Literal[3, 4],
                 armies: List[str]
-            ) -> None:
+                ) -> None:
 
-        if board_limit not in [3,4]:
+        if board_limit not in [3, 4]:
             raise ValueError("board_limit must be 3 or 4")
         if len(armies) < 2:
             raise ValueError("At least two armies must be specified.")
@@ -625,14 +629,13 @@ class HexBoard():
         self.board_limit = board_limit
         self.cube_direction_vectors: List[Tuple] = CUBE_DIRECTION_VECTORS
         self.armies = armies
-        self.tiles: Dict[str,List[Tile]]\
+        self.tiles: Dict[str, List[Tile]]\
             = {army: [] for army in armies}
         self.hexes: List[Tuple[int, int, int]] = []
-        self.occupied: Dict[str,List[Tuple[int, int, int]]]\
+        self.occupied: Dict[str, List[Tuple[int, int, int]]]\
             = {army: [] for army in armies}
-        self.position_index: Dict[str,Dict[Tuple[int, int, int],Tile]]\
+        self.position_index: Dict[str, Dict[Tuple[int, int, int], Tile]]\
             = {army: {} for army in self.armies}
-
 
     def add_tile_to_board(self, tile: Tile) -> None:
         """
@@ -648,6 +651,10 @@ class HexBoard():
         """
         if not isinstance(tile, Tile):
             raise ValueError("tile is not a Tile instance")
+
+        if tile.board_position == (-1,-1,-1):
+            return
+
         if tile.board_position not in self.hexes:
             raise ValueError(
                 f"tile position not on the board: {tile.board_position}"
@@ -658,8 +665,8 @@ class HexBoard():
 
         if tile.board_position in self.occupied[tile.army_name]:
             raise ValueError(
-                    f"Position {tile.board_position} is already occupied."
-                )
+                f"Position {tile.board_position} is already occupied."
+            )
 
         self.occupied[tile.army_name].append(tile.board_position)
         self.tiles[tile.army_name].append(tile)
@@ -686,7 +693,7 @@ class HexBoard():
     def find_army_tile_at_position(self,
                                 army_name: str,
                                 position: Tuple[int, int, int]
-                            ) -> Optional[Tile]:
+                                ) -> Optional[Tile]:
         """
         Finds and returns the tile belonging to a specific army at
         a given position. Returns `None` if no tile is found
@@ -732,11 +739,11 @@ class HexBoard():
             y = -r
             z = +r
 
-            self.hexes.append((x,y,z))
+            self.hexes.append((x, y, z))
             index += 1
 
             for j in range(6):
-                if j==5:
+                if j == 5:
                     num_of_hexes_in_edge = r-1
                 else:
                     num_of_hexes_in_edge = r
@@ -745,10 +752,5 @@ class HexBoard():
                     y = y+self.cube_direction_vectors[j][1]
                     z = z+self.cube_direction_vectors[j][2]
 
-                    self.hexes.append((x,y,z))
+                    self.hexes.append((x, y, z))
                     index += 1
-
-
-if __name__ == "__main__":
-    deck = Deck("borgo")
-    deck.init_deck()
