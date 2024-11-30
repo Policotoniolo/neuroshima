@@ -1,6 +1,6 @@
 from typing import Tuple, List, TypeVar
 
-from config import (BOARD_PIXEL_TO_CUBE,
+from scripts.utils.config import (BOARD_PIXEL_TO_CUBE,
                         CUBE_DIRECTION_VECTORS,
                         DISPLAY_SIZE,
                         BOARD_LIMIT

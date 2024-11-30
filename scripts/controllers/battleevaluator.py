@@ -3,10 +3,10 @@ from typing import List, Tuple
 import operator
 import copy
 
-from scripts.model import HexBoard, Tile
-from moduleevaluator import ModuleEvaluator
-from view import View
-from functions import *
+from scripts.model.model import HexBoard, Tile
+from scripts.controllers.moduleevaluator import ModuleEvaluator
+from scripts.view.view import View
+from scripts.utils.functions import *
 
 
 class BattleEvaluator:

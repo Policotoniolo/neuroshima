@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 
 from typing import List, Literal, Tuple, Optional, Dict
 
-from config import CUBE_DIRECTION_VECTORS
-from functions import raise_wrong_cube_coordinate
+from scripts.utils.config import CUBE_DIRECTION_VECTORS
+from scripts.utils.functions import raise_wrong_cube_coordinate
 
 
 @dataclass

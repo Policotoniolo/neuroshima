@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
-from scripts.model import HexBoard, Tile
-from functions import next_element, calculate_position
+from scripts.model.model import HexBoard, Tile
+from scripts.utils.functions import next_element, calculate_position
 
 
 class ModuleEvaluator:
