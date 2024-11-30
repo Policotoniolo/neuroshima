@@ -539,8 +539,3 @@ class GameController:
                 if self.player_turn(player, event_list):
                     round_iteration += 1
                     run = False
-
-
-if __name__ == "__main__":
-    game = GameController()
-    game.run()
