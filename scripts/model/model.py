@@ -374,7 +374,7 @@ class Deck:
             ValueError: If the army module or attribute is not found.
         """
         try:
-            module = importlib.import_module(f"armies.{self.army_name}")
+            module = importlib.import_module(f"scripts.armies.{self.army_name}")
             army = getattr(module, self.army_name)
         except ModuleNotFoundError:
             raise ValueError(
