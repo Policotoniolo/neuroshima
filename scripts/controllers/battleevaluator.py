@@ -1,5 +1,5 @@
 import pygame
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import operator
 import copy
 
@@ -7,6 +7,7 @@ from scripts.model.model import HexBoard, Tile
 from scripts.controllers.moduleevaluator import ModuleEvaluator
 from scripts.view.view import View
 from scripts.utils.functions import *
+from scripts.utils.config import BOARD_LIMIT
 
 
 class BattleEvaluator:
@@ -29,28 +30,29 @@ class BattleEvaluator:
 
     Methods
     ----------
-        fire(tilemodel: Tile):
+        fire(tilemodel: Tile) -> None:
             Executes both close-quarters combat (CQC) and 
             ranged attacks for a given tile.
 
         generate_attacks_with_quartiermaitre(
-            tilemodel: Tile, event_list
-        ):
+            tilemodel: Tile, event_list: List[pygame.event.Event]
+        ) -> None:
             Handles special attacks triggered by
             the "quartiermaître" module effect.
 
         get_same_initiative_tiles(initiative: int) -> List[Tile]:
             Retrieves all tiles with the same initiative level.
 
-        remove_dead_tile():
+        remove_dead_tile() -> None:
             Removes tiles from the board that have zero or 
             negative life points.
 
-        battle_round(initiative_round: int, event_list):
+        battle_round(initiative_round: int,\
+                event_list: List[pygame.event.Event]) -> None:
             Executes a single round of combat for all tiles 
             with the same initiative.
 
-        run_battle(event_list):
+        run_battle(event_list: List[pygame.event.Event]) -> None:
             Simulates the battle sequence by resolving rounds in
             descending initiative order.
 
@@ -111,32 +113,39 @@ class BattleEvaluator:
 
         _get_pixel_positions_cac_attacks(
                                 tilemodel: Til
-                            ) -> List[Tuple[int, int]] | None:
-            Retrieves the pixel positions of all valid CQC attack directions.
+                            ) -> Optional[List[Tuple[int, int]]]:
+            Retrieves the pixel positions of all valid CQC attack
+            directions.
 
-        _get_pixel_positions_range_attacks(tilemodel: Tile) -> List[Tuple[int, int]] | None:
-            Retrieves the pixel positions of all valid ranged attack directions.
+        _get_pixel_positions_range_attacks(tilemodel: Tile)\
+            -> Optional[List[Tuple[int, int]]]:
+            Retrieves the pixel positions of all valid ranged attack
+            directions.
 
-        _is_within_board_range(cube_position: Tuple[int, int, int], max_range: int = 2) -> bool:
+        _is_within_board_range(cube_position: Tuple[int, int, int],\
+            max_range: int = BOARD_LIMIT) -> bool:
             Verifies whether a position is within the valid board range.
 
-        _prompt_and_get_attacke_direction_convertion(tilemodel: Tile, 
-                                                    attack_pixel_positions: List[Tuple[int, int]],
-                                                    event_list
-                                                ) -> Tuple[int, int, int] | None:
-            Prompts the user to select an attack direction to convert and 
-            returns the chosen direction.
+        _prompt_and_get_attacke_direction_convertion(\
+                        tilemodel: Tile,\
+                        attack_pixel_positions: List[Tuple[int, int]],\
+                        event_list\
+                    ) -> Optional[Tuple[int, int, int]]:
+            Prompts the user to select an attack direction to convert
+            and returns the chosen direction.
 
-        _converte_attacks_and_copy_tile(tilemodel: Tile, 
-                                        range_attack_to_converte, 
-                                        cac_attack_to_converte
-                                    ) -> Tile:
+        _converte_attacks_and_copy_tile(tilemodel: Tile,\
+        range_attack_to_converte: Optional[Tuple[int, int, int]],\
+        cac_attack_to_converte: Optional[Tuple[int, int, int]]\
+    ) -> Tile:
             Creates a copy of the tile and converts a specified attack.
 
-        _converte_range_attack(tilemodel: Tile, range_attack_to_converte):
+        _converte_range_attack(tilemodel: Tile,\
+            range_attack_to_converte: Tuple[int, int, int]):
             Converts a ranged attack into a CQC attack.
 
-        _converte_cac_attack(tilemodel: Tile, cac_attack_to_converte):
+        _converte_cac_attack(tilemodel: Tile,\
+                cac_attack_to_converte: Tuple[int, int, int]):
             Converts a CQC attack into a ranged attack.
     """
 
@@ -158,9 +167,10 @@ class BattleEvaluator:
         self.module_evaluator = module_evaluator
         self.view = view
 
-    def fire(self, tilemodel: Tile):
+    def fire(self, tilemodel: Tile) -> None:
         """
-        Executes both close-quarters combat (CQC) and ranged attacks for a given tile.
+        Executes both close-quarters combat (CQC) and ranged attacks for
+        a given tile.
 
         Args:
             tilemodel (Tile): The tile initiating the attack.
@@ -177,10 +187,11 @@ class BattleEvaluator:
         self._apply_range_attacks(tilemodel, enemy_army_name)
 
     def generate_attacks_with_quartiermaitre(self,
-                                            tilemodel: Tile,
-                                            event_list: List[pygame.event.Event]
-                                            ) -> None:
-        """Handles special attacks triggered by the "quartiermaître" module effect.
+                                        tilemodel: Tile,
+                                        event_list: List[pygame.event.Event]
+                                    ) -> None:
+        """Handles special attacks triggered by the "quartiermaître"
+        module effect.
 
         Args:
             tilemodel (Tile): The tile initiating the attack.
@@ -226,7 +237,8 @@ class BattleEvaluator:
         ]
 
     def remove_dead_tile(self) -> None:
-        """Removes tiles from the board that have zero or negative life points."""
+        """Removes tiles from the board that have zero or negative life
+        points."""
         for army in self.board.armies:
             for tile in self.board.tiles[army]:
                 if tile.life_point and tile.life_point < 0:
@@ -236,7 +248,8 @@ class BattleEvaluator:
                     initiative_round: int,
                     event_list: List[pygame.event.Event]
                     ) -> None:
-        """Executes a single round of combat for all tiles with the same initiative.
+        """Executes a single round of combat for all tiles with the same
+        initiative.
 
         Args:
             initiative_round (int): initiative of the round
@@ -251,7 +264,8 @@ class BattleEvaluator:
         self.remove_dead_tile()
 
     def run_battle(self, event_list: List[pygame.event.Event]) -> None:
-        """Simulates the battle sequence by resolving rounds in descending initiative order.
+        """Simulates the battle sequence by resolving rounds in
+        descending initiative order.
 
         Args:
             event_list (List[pygame.event.Event]): Pygame events list
@@ -268,14 +282,16 @@ class BattleEvaluator:
 # --- MÉTHODES PRIVÉES ---
 
     def _get_max_initiative(self) -> int:
-        """Return the highest initiative among all tiles on the board."""
+        """Return the highest initiative among all tiles on the board.
+        """
         return max(
             max(tilemodel.initiative) for army in self.board.armies
             for tilemodel in self.board.tiles[army] if tilemodel.initiative
         )
 
     def _get_enemy_army(self, army_name: str) -> str:
-        """Identifies the opposing army based on the provided army name."""
+        """Identifies the opposing army based on the provided army name.
+        """
         return next_element(self.board.armies, army_name)
 
     def _apply_cac_attacks(self, tilemodel: Tile, enemy_army_name: str):
@@ -284,12 +300,15 @@ class BattleEvaluator:
 
         This function iterates over the cac attack directions and 
         powers defined for the attacking tile. 
-        For each attack, it delegates the damage application to `_process_cac_attack`,
-        handling the targeting and damage mechanics.
+        For each attack, it delegates the damage application to
+        `_process_cac_attack`, handling the targeting and damage
+        mechanics.
 
         Args:
-            tilemodel (Tile): The attacking tile performing the cac attacks.
-            enemy_army_name (str): The name of the enemy army to target.
+            tilemodel (Tile):
+                The attacking tile performing the cac attacks.
+            enemy_army_name (str):
+                The name of the enemy army to target.
         """
         if tilemodel.cac_attacks_direction:
             for index, cac_attack_direction in \
@@ -306,12 +325,15 @@ class BattleEvaluator:
 
         This function iterates over the ranged attack directions and
         powers defined for the attacking tile. 
-        For each attack, it delegates the damage application to `_process_range_attack`,
-        handling the targeting and damage mechanics.
+        For each attack, it delegates the damage application to
+        `_process_range_attack`, handling the targeting and damage
+        mechanics.
 
         Args:
-            tilemodel (Tile): The attacking tile performing the ranged attacks.
-            enemy_army_name (str): The name of the enemy army to target.
+            tilemodel (Tile):
+                The attacking tile performing the ranged attacks.
+            enemy_army_name (str):
+                The name of the enemy army to target.
         """
         if tilemodel.range_attacks_direction:
             for index, range_attack_direction in \
@@ -340,11 +362,14 @@ class BattleEvaluator:
         the specified attack power.
 
         Args:
-            tilemodel (Tile): The attacking tile performing the close-combat attack.
-            enemy_army_name (str): The name of the enemy army to target.
-            cac_attack_direction (Tuple[int, int, int]): The direction of the attack
-                                                        in cube coordinates.
-            cac_attack_power (int): The power of the close-combat attack.
+            tilemodel (Tile):
+                The attacking tile performing the close-combat attack.
+            enemy_army_name (str):
+                The name of the enemy army to target.
+            cac_attack_direction (Tuple[int, int, int]):
+                The direction of the attack in cube coordinates.
+            cac_attack_power (int):
+                The power of the close-combat attack.
         """
 
         cac_attack_position = calculate_position(
@@ -362,20 +387,25 @@ class BattleEvaluator:
                             enemy_army_name: str,
                             range_attack_direction: Tuple[int, int, int],
                             range_attack_power: int
-                            ):
+                        ):
         """
-        Processes a ranged attack from a tile and applies damage to the enemy target if hit.
+        Processes a ranged attack from a tile and applies damage to the
+        enemy target if hit.
 
-        This function simulates a ranged attack by iteratively advancing in the specified
-        direction from the tile's current position. If the attack encounters an enemy tile,
-        it calculates the damage, factoring in potential shield protection.
+        This function simulates a ranged attack by iteratively advancing
+        in the specified direction from the tile's current position.
+        If the attack encounters an enemy tile, it calculates the
+        damage, factoring in potential shield protection.
 
         Args:
-            tilemodel (Tile): The attacking tile performing the ranged attack.
-            enemy_army_name (str): The name of the enemy army to target.
-            range_attack_direction (Tuple[int, int, int]): The direction of 
-                                        the ranged attack in cube coordinates.
-            range_attack_power (int): The base power of the ranged attack.
+            tilemodel (Tile):
+                The attacking tile performing the ranged attack.
+            enemy_army_name (str):
+                The name of the enemy army to target.
+            range_attack_direction (Tuple[int, int, int]):
+                The direction of the ranged attack in cube coordinates.
+            range_attack_power (int):
+                The base power of the ranged attack.
         """
         touched = False
         range_attack_position = tilemodel.board_position
@@ -402,15 +432,17 @@ class BattleEvaluator:
 
     def _get_pixel_positions_cac_attacks(self,
                                         tilemodel: Tile
-                                        ) -> List[Tuple[int, int]] | None:
-        """Retrieves the pixel positions of all valid CQC attack directions of the tile.
+                                    ) -> Optional[List[Tuple[int, int]]]:
+        """Retrieves the pixel positions of all valid CQC attack 
+        directions of the tile.
 
         Args:
             tilemodel (Tile): Tile used
 
         Returns:
-            List[Tuple[int, int]] | None: List of pixel positions or
-                                        None if the tile had any CQC attacks
+            Optional[List[Tuple[int, int]]]: 
+                List of pixel positions or None if the tile had any CQC
+                attacks
         """
         if tilemodel.range_attacks_direction:
             real_range_attack_directions = [
@@ -421,14 +453,15 @@ class BattleEvaluator:
 
     def _get_pixel_positions_range_attacks(self,
                                         tilemodel: Tile
-                                        ) -> List[Tuple[int, int]] | None:
-        """Retrieves the pixel positions of all valid ranged attack directions.
+                                    ) -> Optional[List[Tuple[int, int]]]:
+        """Retrieves the pixel positions of all valid ranged attack
+        directions.
 
         Args:
             tilemodel (Tile): Tile used
 
         Returns:
-            List[Tuple[int, int]] | None: List of pixel positions or
+            Optional[List[Tuple[int, int]]]: List of pixel positions or
             None if the tile had any ranged attacks
         """
         if tilemodel.cac_attacks_direction is not None:
@@ -440,9 +473,16 @@ class BattleEvaluator:
 
     def _is_within_board_range(self,
                             cube_position: Tuple[int, int, int],
-                            max_range: int = 2
-                            ):
-        """Verifies whether a position is within the valid board range."""
+                            max_range: int = BOARD_LIMIT
+                            ) -> bool:
+        """Verifies whether a position is within the valid board range.
+
+        Args:
+            cube_position (Tuple[int, int, int]): Position to checke
+            max_range (int, optional): Board limit.
+        Returns:
+            bool: True if is within the valid board range.
+        """
         return all(abs(coord) <= max_range for coord in cube_position)
 
     def _prompt_and_get_attacke_direction_convertion(
@@ -450,19 +490,21 @@ class BattleEvaluator:
         tilemodel: Tile,
         attack_pixel_positions: List[Tuple[int, int]],
         event_list: List[pygame.event.Event]
-    ) -> Tuple[int, int, int] | None:
+    ) -> Optional[Tuple[int, int, int]]:
         """
         Prompts the user to select an attack direction to convert and
         returns the chosen direction.
 
         Args:
             tilemodel (Tile): Tile for which to convert an attack .
-            attack_pixel_positions (List[Tuple[int, int]]): List of the pixel position attacks
-                                                        of the Tile 'tilemodel'.
-            event_list (List[pygame.event.Event]e_): Pygame event list.
+            attack_pixel_positions (List[Tuple[int, int]]):
+                List of the pixel position attacks of the Tile
+                'tilemodel'.
+            event_list (List[pygame.event.Event]): Pygame event list.
 
         Returns:
-            Tuple[int, int, int] | None: Return the cube directions of the attack to convert.
+            Optional[Tuple[int, int, int]]:
+                Return the cube directions of the attack to convert.
         """
         for pixel_position in attack_pixel_positions:
             hex = self.view.boardzone.get_hexagone_by_position(
@@ -477,18 +519,18 @@ class BattleEvaluator:
                 return cube_coord
 
     def _converte_attacks_and_copy_tile(self,
-                        tilemodel: Tile,
-                        range_attack_to_converte: Tuple[int, int, int] | None,
-                        cac_attack_to_converte: Tuple[int, int, int] | None
+                    tilemodel: Tile,
+                    range_attack_to_converte: Optional[Tuple[int, int, int]],
+                    cac_attack_to_converte: Optional[Tuple[int, int, int]]
                     ) -> Tile:
         """Creates a copy of the tile and converts a specified attack.
 
         Args:
             tilemodel (Tile): Tile to copy and convert
-            range_attack_to_converte (Tuple[int, int, int] | None): Ranged attack to convert. 
-                                                                    None if any
-            cac_attack_to_converte (Tuple[int, int, int] | None): CQC attack to convert.
-                                                                    None if any
+            range_attack_to_converte (Optional[Tuple[int, int, int]]): 
+                Ranged attack to convert. None if any
+            cac_attack_to_converte (Optional[Tuple[int, int, int]]): 
+                CQC attack to convert.None if any
 
         Returns:
             Tile: The copied tile with converted attack
@@ -508,7 +550,8 @@ class BattleEvaluator:
 
         Args:
             tilemodel (Tile): Tile to convert.
-            range_attack_to_converte (Tuple[int, int, int]): Attack direction to convert.
+            range_attack_to_converte (Tuple[int, int, int]): 
+                Attack direction to convert.
         """
         index_power = tilemodel.range_attacks_direction.index(
             range_attack_to_converte)
@@ -525,7 +568,8 @@ class BattleEvaluator:
 
         Args:
             tilemodel (Tile): Tile to convert.
-            cac_attack_to_converte (Tuple[int, int, int]): Attack direction to convert.
+            cac_attack_to_converte (Tuple[int, int, int]):
+                Attack direction to convert.
         """
         index_power = tilemodel.cac_attacks_direction.index(
             cac_attack_to_converte)
