@@ -625,7 +625,10 @@ class HexBoard():
                                     ) -> Optional[Tile]:
             Finds and returns a tile from any army at the specified
             position. Returns `None` if no tile is found.
-        create_board(self) -> None:
+
+    Private Methods
+    ----------
+        _create_board(self) -> None:
             Initializes the board by generating all valid positions
             based on the `board_limit`.
     """
@@ -650,6 +653,7 @@ class HexBoard():
             = {army: [] for army in armies}
         self.position_index: Dict[str, Dict[Tuple[int, int, int], Tile]]\
             = {army: {} for army in self.armies}
+        self._create_board()
 
     def add_tile_to_board(self, tile: Tile) -> None:
         """
@@ -740,7 +744,7 @@ class HexBoard():
                 return tile
         return None
 
-    def create_board(self) -> None:
+    def _create_board(self) -> None:
         """
         Initializes the board by generating all valid positions
         based on the `board_limit`.
