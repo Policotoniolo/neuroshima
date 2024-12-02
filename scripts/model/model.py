@@ -315,11 +315,6 @@ class Deck:
 
     Methods
     ----------
-        shuffle_deck(self) -> None:
-            Shuffles the tiles list deck.
-
-        init_deck(self) -> None:
-            Initializes the deck tiles list.
 
         remove_top_deck_tile(self) -> Optional[Tile]:
             Removes and returns the top tile from the deck.
@@ -334,21 +329,25 @@ class Deck:
     _dict_to_tile(self, dict_tile: dict) -> Tile:
         Converts a dictionary representation of a tile into a Tile
         object.
+
+    _init_deck(self) -> None:
+        Initializes the deck tiles list.
+
+    _shuffle_deck(self) -> None:
+        Shuffles the tiles list deck.
+
+    _init_hq_tile(self) -> None:
+        Save hq tile player in a Deck attribut.
     """
 
     def __init__(self, army_name: str):
         self.tiles: List[Tile] = []  # Main deck
         self.army_name = army_name
         self.defausse: List[Tile] = []  # Discard pile
-
-    def shuffle_deck(self) -> None:
-        """Shuffles the tiles list deck."""
-        random.shuffle(self.tiles)
-
-    def init_deck(self) -> None:
-        """Initializes the deck tiles list."""
-        army = self._get_army()
-        self.tiles = [self._dict_to_tile(tile_dict) for tile_dict in army]
+        self.hq_tile: Tile
+        self._init_deck()
+        self._init_hq_tile()
+        self._shuffle_deck()
 
     def remove_top_deck_tile(self) -> Optional[Tile]:
         """Removes and returns the top tile from the deck.
@@ -360,6 +359,13 @@ class Deck:
         return self.tiles.pop(0) if self.tiles else None
 
     # --- MÉTHODES PRIVÉES ---
+
+    def _init_hq_tile(self) -> None:
+        """Save hq tile player in a Deck attribut
+        """
+        tile = self.remove_top_deck_tile()
+        if tile:
+            self.hq_tile = tile 
 
     def _get_army(self) -> List[dict]:
         """
@@ -421,6 +427,14 @@ class Deck:
             board_position=(-1, -1, -1)  # Default invalid position
         )
 
+    def _init_deck(self) -> None:
+        """Initializes the deck tiles list."""
+        army = self._get_army()
+        self.tiles = [self._dict_to_tile(tile_dict) for tile_dict in army]
+
+    def _shuffle_deck(self) -> None:
+        """Shuffles the tiles list deck."""
+        random.shuffle(self.tiles)
 
 class Hand:
     """
