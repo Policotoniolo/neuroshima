@@ -1255,7 +1255,7 @@ class View():
                 self.discardzone.tiles.add(tile)
                 self.tiles_hand.remove(tile)
 
-    def get_id_tile_to_keep(self) -> List[int]:
+    def get_id_tile_to_keep(self) -> List[str]:
         """
         Returns the list of tile IDs to keep based on their interaction
         with the keep zone.
@@ -1264,7 +1264,7 @@ class View():
             List[int]: A list of tile IDs that the player wants to keep.
         """
         indexes_keep = [
-                    tile 
+                    tile.id_tile
                     for tile in self.tiles_hand
                     if pygame.sprite.collide_rect(tile, self.keepzone)
                 ]
