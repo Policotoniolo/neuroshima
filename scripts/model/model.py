@@ -363,9 +363,11 @@ class Deck:
     def _init_hq_tile(self) -> None:
         """Save hq tile player in a Deck attribut
         """
-        tile = self.remove_top_deck_tile()
-        if tile:
+        tile = self.tiles[0]
+        if tile.kind == "base":
             self.hq_tile = tile 
+        else:
+            raise ValueError("Base tile not in first position")
 
     def _get_army(self) -> List[dict]:
         """
@@ -592,6 +594,8 @@ class HexBoard():
         cube_direction_vectors (List[Tuple]):
             Predefined vectors used to calculate adjacent hexagonal
             coordinates.
+        all_tiles (List[Tile]):
+            Contains all tiles of each players in a list
         tiles (Dict[str,List[Tile]]):
             Tracks all tiles on the board for each army. Keys are army
             names, and values are lists of `Tile` objects
@@ -631,11 +635,14 @@ class HexBoard():
         _create_board(self) -> None:
             Initializes the board by generating all valid positions
             based on the `board_limit`.
+        _init_all_tiles(players) -> None:
+            Initializes the list `all_tiles`
     """
 
     def __init__(self,
                 board_limit: Literal[3, 4],
-                armies: List[str]
+                armies: List[str],
+                players: List[Player]
                 ) -> None:
 
         if board_limit not in [3, 4]:
@@ -646,6 +653,7 @@ class HexBoard():
         self.board_limit = board_limit
         self.cube_direction_vectors: List[Tuple] = CUBE_DIRECTION_VECTORS
         self.armies = armies
+        self.all_tile: List[Tile] = []
         self.tiles: Dict[str, List[Tile]]\
             = {army: [] for army in armies}
         self.hexes: List[Tuple[int, int, int]] = []
@@ -654,6 +662,7 @@ class HexBoard():
         self.position_index: Dict[str, Dict[Tuple[int, int, int], Tile]]\
             = {army: {} for army in self.armies}
         self._create_board()
+        self._init_all_tiles(players)
 
     def add_tile_to_board(self, tile: Tile) -> None:
         """
@@ -772,3 +781,13 @@ class HexBoard():
 
                     self.hexes.append((x, y, z))
                     index += 1
+
+    def _init_all_tiles(self, players:List[Player]) -> None:
+        """Initializes the list `all_tiles`
+
+        Args:
+            players (List[Player]): List of player isntance
+        """
+        for player in players:
+            tiles = player.deck.tiles
+            self.all_tile.extend(tiles)
