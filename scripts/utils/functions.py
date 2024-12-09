@@ -95,6 +95,10 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
             )
             for direction in CUBE_DIRECTION_VECTORS
         ]
+        neighbors = [position 
+                    for position in neighbors
+                    if all(abs(x) < BOARD_LIMIT for x in position)
+                ]
         return neighbors
     except ValueError as ve:
         print(f"Error: {ve}")
