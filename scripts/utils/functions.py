@@ -200,7 +200,7 @@ def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int],
         raise ValueError("The sum of the three coordinates is not \
                     equal to 0.")
 
-    if not all(abs(x) > board_limit for x in cube_coordinate):
+    if not all(abs(x) < board_limit for x in cube_coordinate):
         raise ValueError(f"The position {cube_coordinate} is outside \
                     of the board")
 
