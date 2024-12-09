@@ -365,7 +365,8 @@ class Deck:
         """
         tile = self.tiles[0]
         if tile.kind == "base":
-            self.hq_tile = tile 
+            self.hq_tile = tile
+            self.tiles.remove(tile)
         else:
             raise ValueError("Base tile not in first position")
 
@@ -791,3 +792,4 @@ class HexBoard():
         for player in players:
             tiles = player.deck.tiles
             self.all_tile.extend(tiles)
+            self.all_tile.append(player.deck.hq_tile)
