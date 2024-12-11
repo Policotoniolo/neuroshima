@@ -285,6 +285,9 @@ class Hexagone(pygame.sprite.Sprite):
         interactions.
     position : Tuple[int, int]
         The (x, y) position of the hexagon on the board in pixels.
+    radius: int
+        Raduis for used for pygame methods as
+        pygame.sprite.collide_circle()
     radius_hexa : int
         The radius of the hexagon, defining its size.
     collide : bool
@@ -342,6 +345,7 @@ class Hexagone(pygame.sprite.Sprite):
         self.rect.topleft = (position[0]+15, position[1]+10)
 
         self.radius_hexa = 42
+        self.radius = 50
         self.collide = False
         self.vertices = self._compute_vertice()
 
