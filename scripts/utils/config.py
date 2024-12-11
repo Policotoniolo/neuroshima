@@ -22,6 +22,16 @@ BOARD_PIXEL_TO_CUBE = {(302, 241): (-2, 0, 2),
                     (598, 413): (2, 0, -2)
                     }
 
+INNER_BOARD_PIXEL_POSITIONS = [
+            (376, 284), (376, 369), (451, 241), (451,
+            327), (450, 413), (525, 370), (525, 284)
+        ]
+
+INNER_BOARD_CUBE_POSITIONS = [
+        (-1, 0, 1), (-1, 1, 0), (0, -1, 1), (0, 0, 0),
+        (0, 1, -1), (1, -1, 0), (1, 0, -1)
+]
+
 # Used for finding neighbors and creating the board
 CUBE_DIRECTION_VECTORS = [
     (1,0,-1),(0,1,-1),(-1,1,0),(-1,0,1),(0,-1,1),(1,-1,0)
