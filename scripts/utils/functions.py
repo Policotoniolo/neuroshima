@@ -50,6 +50,23 @@ def coordinates_pixel_to_cube(pixel_position: Tuple[int, int]
     except KeyError:
         raise KeyError("Invalid pixel position")
 
+def list_pixel_to_cube(list_pixel_positions: List[Tuple[int, int]]
+                        ) -> List[Tuple[int, int, int]]:
+    """Transforms a list of pixel position into a list of cube
+    positions.
+
+    Args:
+        list_pixel_positions (List[Tuple[int, int]]):
+            List of pixel positions
+
+    Returns:
+        List[Tuple[int, int, int]]: List of cube positions
+
+    """
+    return [coordinates_pixel_to_cube(position)
+            for position in list_pixel_positions
+        ]
+
 T = TypeVar('T')
 def next_element(elements: List[T], element: T):
     """
@@ -73,7 +90,7 @@ def next_element(elements: List[T], element: T):
 def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
                             ) -> List[Tuple[int, int, int]]:
     """
-    Calculate the neighboring cube coordinates for a given position.
+    Calculate the neighbors in cube coordinates for a given position.
 
     Args:
         cube_coordinates (Tuple[int, int, int]):
@@ -107,7 +124,7 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
 
 def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
                     ) -> List[Tuple[int, int]]:
-    """Transforms a list of cube coordinates into a list of  pixel
+    """Transforms a list of cube coordinates into a list of pixel
     positions.
 
     Args:
