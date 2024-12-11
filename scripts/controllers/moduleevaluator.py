@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-from scripts.model.model import HexBoard, Tile
+from scripts.model.model import Tile
 from scripts.controllers import gamecontroller
 from scripts.utils.functions import next_element, calculate_position
 

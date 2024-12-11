@@ -5,9 +5,9 @@ from __future__ import annotations
 import pygame
 from typing import List, Optional
 
-from scripts.model.model import HexBoard, Player, Tile
+from scripts.model.model import Player, Tile
 from scripts.controllers import gamecontroller
-from scripts.view.view import View, TileView
+from scripts.view.view import TileView
 from scripts.utils.functions import *
 from scripts.utils.config import *
 
