@@ -1,8 +1,12 @@
+# This import able to import gamecontroller without circular 
+# import issue
+from __future__ import annotations
+
 import pygame
 from typing import List, Optional
 
 from scripts.model.model import HexBoard, Player, Tile
-# from scripts.controllers import gamecontroler
+from scripts.controllers import gamecontroler
 from scripts.view.view import View, TileView
 from scripts.utils.functions import *
 from scripts.utils.config import *
@@ -81,7 +85,7 @@ class TileController:
     def __init__(self,
                 board: HexBoard,
                 view: View,
-                gamecontroller
+                gamecontroller: gamecontroler.GameController
             ) -> None:
         """
         Initializes the controller with a game board and the view.
