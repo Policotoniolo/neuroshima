@@ -24,8 +24,7 @@ BOARD_PIXEL_TO_CUBE = {(302, 241): (-2, 0, 2),
 
 # Used for finding neighbors and creating the board
 CUBE_DIRECTION_VECTORS = [
-    (+1, 0, -1), (+1, -1, 0), (0, -1, +1),
-    (-1, 0, +1), (-1, +1, 0), (0, +1, -1),
+    (1,0,-1),(0,1,-1),(-1,1,0),(-1,0,1),(0,-1,1),(1,-1,0)
 ]
 
 # link between rotation direction index and coordinates.
