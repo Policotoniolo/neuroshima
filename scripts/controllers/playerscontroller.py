@@ -168,7 +168,9 @@ class PlayersController:
         self.gamecontroller.view.move_tile_hand(event_list)
         self.gamecontroller.view.move_tile_board(event_list)
 
-        self.gamecontroller.tileactioncontroller.actiontile(player, event_list)
+        self.gamecontroller.tileactioncontroller.actiontile(player,
+                                                        event_list
+                                                    )
 
         self.gamecontroller.view.generate_all_sprite_group()
         self.gamecontroller.view.display_all_sprite()
@@ -194,7 +196,8 @@ class PlayersController:
                 False otherwise.
         """
         if self.gamecontroller.view.endbutton.isvalidated(event_list):
-            id_tileviews_to_keep = self.gamecontroller.view.get_id_tile_to_keep()
+            id_tileviews_to_keep = \
+                self.gamecontroller.view.get_id_tile_to_keep()
             player.discard_tiles_hand(id_tileviews_to_keep)
 
             return True

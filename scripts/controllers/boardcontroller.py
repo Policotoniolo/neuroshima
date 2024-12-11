@@ -124,9 +124,12 @@ class BoardController:
             tile_kind = tileviewinfo.get("kind")
             tile_position = tileview.rect.topleft
             is_valid_position = tile_position in BOARD_PIXEL_TO_CUBE
+            is_on_board = self.gamecontroller.view.boardzone.single_collision(
+                tileview
+            )
 
             if tile_kind in ["unite", "module", "base"]:
-                if self.gamecontroller.view.boardzone.single_collision(tileview):
+                if is_on_board:
                     self.gamecontroller.view.tiles_board.add(tileview)
                     if is_valid_position:
                         self._update_tile_model(
@@ -137,7 +140,9 @@ class BoardController:
 
                 elif self._check_if_tile_on_board(tileview.id_tile):
                         self.gamecontroller.view.tiles_board.remove(tileview)
-                        self.gamecontroller.board.remove_tile_from_board(tileview.id_tile)
+                        self.gamecontroller.board.remove_tile_from_board(
+                            tileview.id_tile
+                        )
 
     # --- MÉTHODES PRIVÉES ---
 
@@ -208,7 +213,8 @@ class BoardController:
             player (Player): The player whose units are being updated.
         """
         moving_units = (
-            tilemodel for tilemodel in self.gamecontroller.board.tiles[player.deck.army_name]
+            tilemodel for tilemodel
+            in self.gamecontroller.board.tiles[player.deck.army_name]
             if tilemodel.special_capacities
             and "movement" in tilemodel.special_capacities
         )
@@ -246,13 +252,15 @@ class BoardController:
             self.gamecontroller.board.add_tile_to_board(tilemodel)
 
         else:
-            self.gamecontroller.board.occupied[tilemodel.army_name].append(cube_coordinates)
-            self.gamecontroller.board.occupied[tilemodel.army_name].remove(old_board_position)
+            self.gamecontroller.board.occupied[
+                tilemodel.army_name].append(cube_coordinates)
+            self.gamecontroller.board.occupied[
+                tilemodel.army_name].remove(old_board_position)
 
-            del self.gamecontroller.board.position_index[tilemodel.army_name]\
-                [old_board_position]
-            self.gamecontroller.board.position_index[tilemodel.army_name][cube_coordinates] \
-                = tilemodel
+            del self.gamecontroller.board.position_index[
+                tilemodel.army_name][old_board_position]
+            self.gamecontroller.board.position_index[
+                tilemodel.army_name][cube_coordinates] = tilemodel
 
     def _update_board_model(self) -> None:
         """
@@ -315,7 +323,8 @@ class BoardController:
         """
 
         tile = next(
-        (tile for tile in self.gamecontroller.board.all_tile if tile.id_tile == id_tile),
+        (tile for tile in self.gamecontroller.board.all_tile
+        if tile.id_tile == id_tile),
         None
     )
         if tile is None:

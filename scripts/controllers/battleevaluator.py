@@ -213,7 +213,8 @@ class BattleEvaluator:
             tilemodel, range_attack_to_converte, cac_attack_to_converte)
 
         self.fire(tileconverted)
-        self.gamecontroller.moduleevaluator._clean_quartiermaitre_effect_on_tile(tilemodel)
+        self.gamecontroller.moduleevaluator\
+            ._clean_quartiermaitre_effect_on_tile(tilemodel)
 
     def get_same_initiative_tiles(self, initiative: int) -> List[Tile]:
         """Retrieves all tiles with the same initiative level.
@@ -237,7 +238,8 @@ class BattleEvaluator:
         for army in self.gamecontroller.board.armies:
             for tile in self.gamecontroller.board.tiles[army]:
                 if tile.life_point and tile.life_point < 0:
-                    self.gamecontroller.board.remove_tile_from_board(tile.id_tile)
+                    self.gamecontroller.board\
+                        .remove_tile_from_board(tile.id_tile)
 
     def battle_round(self,
                     initiative_round: int,
@@ -280,8 +282,10 @@ class BattleEvaluator:
         """Return the highest initiative among all tiles on the board.
         """
         return max(
-            max(tilemodel.initiative) for army in self.gamecontroller.board.armies
-            for tilemodel in self.gamecontroller.board.tiles[army] if tilemodel.initiative
+            max(tilemodel.initiative)
+            for army in self.gamecontroller.board.armies
+            for tilemodel in self.gamecontroller.board.tiles[army]
+            if tilemodel.initiative
         )
 
     def _get_enemy_army(self, army_name: str) -> str:
@@ -404,13 +408,14 @@ class BattleEvaluator:
         """
         touched = False
         range_attack_position = tilemodel.board_position
-        while self._is_within_board_range(range_attack_position) \
-                or not touched:
+        while (self._is_within_board_range(range_attack_position)
+                or not touched):
 
             range_attack_position = calculate_position(
                 range_attack_position, range_attack_direction
             )
-            enemy_tilemodel = self.gamecontroller.board.find_army_tile_at_position(
+            enemy_tilemodel = self.gamecontroller.board.\
+                find_army_tile_at_position(
                 enemy_army_name,
                 range_attack_position
             )
@@ -505,8 +510,8 @@ class BattleEvaluator:
             hex = self.gamecontroller.view.boardzone.get_hexagone_by_position(
                 pixel_position)
             if hex.attacks_range_click_button(event_list,
-                                            self.gamecontroller.view.boardzone.drawsurf
-                                            ):
+                                self.gamecontroller.view.boardzone.drawsurf
+                                ):
                 cube_coord = coordinates_pixel_to_cube(
                     pixel_position)
                 cube_coord = tuple(
