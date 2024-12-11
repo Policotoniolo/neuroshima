@@ -20,11 +20,11 @@ class GameController:
     def __init__(self):
 
         # Model
-        self.players = [Player("paul", "armytest"),
+        self.players = [Player("paul", "borgo"),
                         Player("benoit", "moloch")]
         self.board = HexBoard(
                             BOARD_LIMIT,
-                            armies=['armytest', 'moloch'],
+                            armies=['borgo', 'moloch'],
                             players=self.players
                         )
         
@@ -32,26 +32,11 @@ class GameController:
         self.view = View()
         
         # Controller
-
-    def _init_controllers(self):
-        self.moduleevaluator\
-            = ModuleEvaluator(self.board)
-        self.tileactioncontroller\
-            = TileController(self.board,
-                            self.view, self)
-        self.boardcontroller\
-            = BoardController(self.board,
-                            self.view)
-        self.battleevaluator\
-            = BattleEvaluator(self.board,
-                            self.moduleevaluator,
-                            self.view)
-        self.playerscontroller\
-            = PlayersController(self.board,
-                                self.players,
-                                self.view,
-                                self.tileactioncontroller)
-
+        self.moduleevaluator = ModuleEvaluator(self)
+        self.tileactioncontroller = TileController(self)
+        self.boardcontroller = BoardController(self)
+        self.battleevaluator = BattleEvaluator(self)
+        self.playerscontroller = PlayersController(self)
 
     def _quitte_loop(self, event_list: List[pygame.event.Event]):
         for event in event_list:
@@ -124,7 +109,6 @@ class GameController:
 
     def run(self):
         """Script running the game"""
-        self._init_controllers()
         game_running = True
         self._set_up()
         self._start_game()

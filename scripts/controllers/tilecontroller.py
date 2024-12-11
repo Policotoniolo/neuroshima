@@ -6,7 +6,7 @@ import pygame
 from typing import List, Optional
 
 from scripts.model.model import HexBoard, Player, Tile
-from scripts.controllers import gamecontroler
+from scripts.controllers import gamecontroller
 from scripts.view.view import View, TileView
 from scripts.utils.functions import *
 from scripts.utils.config import *
@@ -22,13 +22,9 @@ class TileController:
 
     Attributes
     ----------
-    board : HexBoard
-        The game board containing tiles and their positions.
-    view : View
-        The graphical interface providing user interactions and
-        feedback.
-    gamecontroller : GameController
-        Main controller.
+    gamecontroller (GameController): 
+            The main controller with all others sub controllers and
+            models informations.
 
     Methods
     -------
@@ -83,22 +79,16 @@ class TileController:
     """
 
     def __init__(self,
-                board: HexBoard,
-                view: View,
-                gamecontroller: gamecontroler.GameController
+                gamecontroller: gamecontroller.GameController
             ) -> None:
         """
-        Initializes the controller with a game board and the view.
+        Initializes the controller.
 
         Args:
-            board (HexBoard): 
-                Game Board model.
-            view (View): 
-                Graphical interface for user interactions and feedback.
-            gamecontroller (GameController): Main controller.
+            gamecontroller (GameController): 
+                The main controller with all others sub controllers and
+                models informations.
         """
-        self.board = board
-        self.view = view
         self.gamecontroller = gamecontroller
 
     def get_tile_info(self, id_tile: str) -> dict:
@@ -114,7 +104,7 @@ class TileController:
             ValueError: if no tile with the ID.
         """
         try:
-            tile = next(tile for tile in self.board.all_tile
+            tile = next(tile for tile in self.gamecontroller.board.all_tile
                         if tile.id_tile == id_tile)
             return tile.__dict__
         except StopIteration:
@@ -137,7 +127,7 @@ class TileController:
             ValueError: If no tile with the given ID exists.
         """
         tile = next(
-        (tile for tile in self.board.all_tile if tile.id_tile == id_tile),
+        (tile for tile in self.gamecontroller.board.all_tile if tile.id_tile == id_tile),
         None
     )
         if tile is None:
@@ -215,15 +205,15 @@ class TileController:
             player = next_element(self.gamecontroller.players, player)
 
         army =  player.deck.army_name
-        army_cube_position = self.board.occupied[army].copy()
+        army_cube_position = self.gamecontroller.board.occupied[army].copy()
 
         if not show_hq:
             hq_tile_position = player.deck.hq_tile.board_position
             army_cube_position.remove(hq_tile_position)
 
         army_pixel_position = list_cubes_to_pixel(army_cube_position)
-        self.view.boardzone.highlight_hexagones(army_pixel_position)
-        self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+        self.gamecontroller.view.boardzone.highlight_hexagones(army_pixel_position)
+        self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
 
     def actiontile(self, player: Player, event_list: List[pygame.event.Event]
                 ) -> None:
@@ -243,14 +233,14 @@ class TileController:
         "movement": lambda tile: self._movement_tile(tile, player, event_list),
         "sniper": lambda tile: self._sniper_tile(player, tile, event_list),
         "grenade": lambda tile: self._grenade_tile(tile, player, event_list),
-        "battle": self._battle_tile,
+        "battle": lambda tile: self._battle_tile(tile, event_list),
         "push": lambda tile: self._push_tile(player, tile, event_list),
         "airstrike": lambda tile: self._airstrike_tile(tile, event_list),
         }
 
-        for tileview in self.view.tiles_hand:
+        for tileview in self.gamecontroller.view.tiles_hand:
             if tileview.manipulator.dragging \
-                or self.view.boardzone.single_collision(tileview):
+                or self.gamecontroller.view.boardzone.single_collision(tileview):
                 tile_informations = self.get_tile_info(tileview.id_tile)
                 action_type = tile_informations.get("action")
 
@@ -278,7 +268,7 @@ class TileController:
 
         tile_collided = pygame.sprite.spritecollideany(
             tileview, # type: ignore
-            self.view.tiles_board,
+            self.gamecontroller.view.tiles_board,
             pygame.sprite.collide_rect_ratio(0.75)
         )
         if tile_collided:
@@ -287,11 +277,11 @@ class TileController:
                                                 is_ally=True):
                 return
             else:
-                if tile_collided.click_tile(event_list, self.view.displaysurf):
-                    self.view.tiles_hand.remove(tileview)
-                    self.view.tiles_board.remove(tileview)
-                    self.view.tiles_board.remove(tile_collided)
-                    self.view.tiles_board_moving.add(tile_collided)
+                if tile_collided.click_tile(event_list, self.gamecontroller.view.displaysurf):
+                    self.gamecontroller.view.tiles_hand.remove(tileview)
+                    self.gamecontroller.view.tiles_board.remove(tileview)
+                    self.gamecontroller.view.tiles_board.remove(tile_collided)
+                    self.gamecontroller.view.tiles_board_moving.add(tile_collided)
 
     def _sniper_tile(self,
                     player: Player,
@@ -311,7 +301,7 @@ class TileController:
         """
         tile_collided = pygame.sprite.spritecollideany(
             tileview, # type: ignore
-            self.view.tiles_board,
+            self.gamecontroller.view.tiles_board,
             pygame.sprite.collide_rect_ratio(0.75)
         )
 
@@ -326,9 +316,9 @@ class TileController:
                                             ):
                 return
             else:
-                if tile_collided.click_tile(event_list, self.view.displaysurf):
-                    self.view.tiles_hand.remove(tileview)
-                    self.view.tiles_board.remove(tileview)
+                if tile_collided.click_tile(event_list, self.gamecontroller.view.displaysurf):
+                    self.gamecontroller.view.tiles_hand.remove(tileview)
+                    self.gamecontroller.view.tiles_board.remove(tileview)
                     self.single_damage(tile_collided)
 
     def _grenade_tile(self,
@@ -346,14 +336,14 @@ class TileController:
         """
         tile_collided = pygame.sprite.spritecollideany(
             tileview, # type: ignore
-            self.view.tiles_board,
+            self.gamecontroller.view.tiles_board,
             pygame.sprite.collide_rect_ratio(0.75)
         )
         n = get_neighbors_hex_positions(player.deck.hq_tile.board_position)
         p = list_cubes_to_pixel(n)
         if tileview.manipulator.dragging:
-            self.view.boardzone.highlight_hexagones(p)
-            self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+            self.gamecontroller.view.boardzone.highlight_hexagones(p)
+            self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
 
         if tile_collided:
             if not self._check_tileview_criteria(player,
@@ -364,8 +354,8 @@ class TileController:
                                             ):
                 return
             else:
-                if tile_collided.click_tile(event_list, self.view.displaysurf):
-                    self.view.tiles_hand.remove(tileview)
+                if tile_collided.click_tile(event_list, self.gamecontroller.view.displaysurf):
+                    self.gamecontroller.view.tiles_hand.remove(tileview)
                     self.single_damage(tile_collided)
 
     def _battle_tile(self,
@@ -380,11 +370,11 @@ class TileController:
             event_list (List[pygame.event.Event]): List of pygame events
         """
         if tileview.manipulator.dragging:
-            self.view.boardzone.displaygreenboard()
-            self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+            self.gamecontroller.view.boardzone.displaygreenboard()
+            self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
 
         elif not tileview.manipulator.dragging:
-            if self.view.boardzone.single_collision(tileview): # type: ignore
+            if self.gamecontroller.view.boardzone.single_collision(tileview): # type: ignore
                 self.launch_battle(event_list)
 
     def _push_tile(self,
@@ -405,7 +395,7 @@ class TileController:
         """
         tile_collided = pygame.sprite.spritecollideany(
             tileview, # type: ignore
-            self.view.tiles_board,
+            self.gamecontroller.view.tiles_board,
             pygame.sprite.collide_rect_ratio(0.10)
         )
         
@@ -427,20 +417,20 @@ class TileController:
                 ):
                 return
             else:
-                hexagone = self.view.boardzone.highlight_and_click_hexagones(
+                hexagone = self.gamecontroller.view.boardzone.highlight_and_click_hexagones(
                                                     enemies_pixel_position,
                                                     event_list
                                                 )
-                self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0)
+                self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0)
                                         )
                 if hexagone:
                     enemy_tileview = pygame.sprite.spritecollideany(
                         hexagone, # type: ignore
-                        self.view.tiles_board
+                        self.gamecontroller.view.tiles_board
                     )
-                    self.view.tiles_hand.remove(tileview)
-                    self.view.tiles_board.remove(enemy_tileview)
-                    self.view.tiles_board_moving.add(enemy_tileview)
+                    self.gamecontroller.view.tiles_hand.remove(tileview)
+                    self.gamecontroller.view.tiles_board.remove(enemy_tileview)
+                    self.gamecontroller.view.tiles_board_moving.add(enemy_tileview)
 
     def _airstrike_tile(self,
                         tileview: TileView,
@@ -455,7 +445,7 @@ class TileController:
             event_list (List[pygame.event.Event]):
                 A list of pygame events.
         """
-        inner_hexagones_board = self.view.boardzone.get_multiple_hexa(
+        inner_hexagones_board = self.gamecontroller.view.boardzone.get_multiple_hexa(
             INNER_BOARD_PIXEL_POSITIONS
         )
         
@@ -464,23 +454,23 @@ class TileController:
             inner_hexagones_board # type: ignore
         )
         if tileview.manipulator.dragging:
-            self.view.boardzone.highlight_hexagones(INNER_BOARD_PIXEL_POSITIONS)
-            self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+            self.gamecontroller.view.boardzone.highlight_hexagones(INNER_BOARD_PIXEL_POSITIONS)
+            self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
         elif not tileview.manipulator.dragging:
-            self.view.boardzone.drawsurf.fill((pygame.Color('#00000000')))
-            self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+            self.gamecontroller.view.boardzone.drawsurf.fill((pygame.Color('#00000000')))
+            self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
 
         if hexagone_collided:
-            self.view.boardzone.highlight_neighbors_hexagone(
+            self.gamecontroller.view.boardzone.highlight_neighbors_hexagone(
                 hexagone_collided, "red")
-            self.view.displaysurf.blit(self.view.boardzone.drawsurf, (0, 0))
+            self.gamecontroller.view.displaysurf.blit(self.gamecontroller.view.boardzone.drawsurf, (0, 0))
 
-            if tileview.click_tile(event_list, self.view.displaysurf):
-                self.view.tiles_hand.remove(tileview)
-                hexagone_damaged = self.view.boardzone.get_neighbors_hexagone(
+            if tileview.click_tile(event_list, self.gamecontroller.view.displaysurf):
+                self.gamecontroller.view.tiles_hand.remove(tileview)
+                hexagone_damaged = self.gamecontroller.view.boardzone.get_neighbors_hexagone(
                     hexagone_collided
                 )
-                for tile in self.view.tiles_board:
+                for tile in self.gamecontroller.view.tiles_board:
                     if (pygame.sprite.spritecollideany(
                         tile,
                         hexagone_damaged) is not None # type: ignore
@@ -505,8 +495,8 @@ class TileController:
         if tilemodel.life_point:
             tilemodel.life_point = tilemodel.life_point-1
             if tilemodel.life_point <= 0:
-                self.view.tiles_board.remove(tileview)
-                self.board.remove_tile_from_board(tileview.id_tile)
+                self.gamecontroller.view.tiles_board.remove(tileview)
+                self.gamecontroller.board.remove_tile_from_board(tileview.id_tile)
 
     def _get_neighbors_tile_enemies_position(self,
                             player: Player,
@@ -533,7 +523,7 @@ class TileController:
             position for position in get_neighbors_hex_positions(
                                         tile_collided_info['board_position']
                                     )
-            if position in self.board.position_index[enemy_army]
+            if position in self.gamecontroller.board.position_index[enemy_army]
         ]
 
         if neighbors_enemies_positions == []:

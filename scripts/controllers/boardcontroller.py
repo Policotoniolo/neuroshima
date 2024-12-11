@@ -1,7 +1,13 @@
+# This import able to import gamecontroller without circular 
+# import issue
+from __future__ import annotations
+
+
 from typing import Optional, Dict, Literal
 
-from scripts.model.model import HexBoard, Tile, Player
-from scripts.view.view import View, TileView
+from scripts.model.model import Tile, Player
+from scripts.view.view import TileView
+from scripts.controllers import gamecontroller
 from scripts.utils.functions import *
 
 
@@ -17,16 +23,12 @@ class BoardController:
 
     Attributes
     ----------
-    board (HexBoard):
-        The model representation of the game board model.
-    view (View):
-        Graphical interface for the Neuroshima game.
+    gamecontroller (GameController): 
+        The main controller with all others sub controllers and
+        models informations.
 
     Methods
     ----------
-    __init__(board, view: View) -> None:
-        Initializes the `BoardController` with a game board and view.
-
     update_board(player: Player) -> None:
         Updates the board model and view, synchronizing their states
         with the given player's tiles.
@@ -77,16 +79,18 @@ class BoardController:
         sprite tile_board_moving.
     """
 
-    def __init__(self, board: HexBoard, view: View) -> None:
+    def __init__(self,
+                gamecontroller: gamecontroller.GameController
+                ) -> None:
         """
-        Initializes the board controller with a game board and view.
+        Initializes the controller.
 
         Args:
-            board (HexBoard): The game board model.
-            view (View): The view of the game board.
+            gamecontroller (GameController): 
+                The main controller with all others sub controllers and
+                models informations.
         """
-        self.board = board
-        self.view = view
+        self.gamecontroller = gamecontroller
 
     def update_board(self, player: Player) -> None:
         """
@@ -115,15 +119,15 @@ class BoardController:
         board, ensuring the model reflects any changes in tile
         positioning or angle.
         """
-        for tileview in self.view.tiles_hand:
+        for tileview in self.gamecontroller.view.tiles_hand:
             tileviewinfo = self._get_info_from_id_tile(tileview.id_tile)
             tile_kind = tileviewinfo.get("kind")
             tile_position = tileview.rect.topleft
             is_valid_position = tile_position in BOARD_PIXEL_TO_CUBE
 
             if tile_kind in ["unite", "module", "base"]:
-                if self.view.boardzone.single_collision(tileview):
-                    self.view.tiles_board.add(tileview)
+                if self.gamecontroller.view.boardzone.single_collision(tileview):
+                    self.gamecontroller.view.tiles_board.add(tileview)
                     if is_valid_position:
                         self._update_tile_model(
                                             tileview.id_tile,
@@ -132,8 +136,8 @@ class BoardController:
                                             )
 
                 elif self._check_if_tile_on_board(tileview.id_tile):
-                        self.view.tiles_board.remove(tileview)
-                        self.board.remove_tile_from_board(tileview.id_tile)
+                        self.gamecontroller.view.tiles_board.remove(tileview)
+                        self.gamecontroller.board.remove_tile_from_board(tileview.id_tile)
 
     # --- MÉTHODES PRIVÉES ---
 
@@ -149,8 +153,8 @@ class BoardController:
             bool: True if the tile is on the board, False otherwise.
         """
         return any(tile.id_tile == id_tile
-                    for army in self.board.armies
-                    for tile in self.board.tiles[army]
+                    for army in self.gamecontroller.board.armies
+                    for tile in self.gamecontroller.board.tiles[army]
                 )
 
     def _get_info_from_id_tile(self, id_tile: str) -> Dict:
@@ -166,7 +170,7 @@ class BoardController:
             ValueError: if tile not found
         """
         try:
-            tile = next(tile for tile in self.board.all_tile
+            tile = next(tile for tile in self.gamecontroller.board.all_tile
                         if tile.id_tile == id_tile)
             return tile.__dict__
         except StopIteration:
@@ -189,7 +193,7 @@ class BoardController:
         """
         return next(
                     (tileview
-                    for tileview in self.view.tiles_board
+                    for tileview in self.gamecontroller.view.tiles_board
                     if tileview.id_tile == id_tile),
                     None
                 )
@@ -204,15 +208,15 @@ class BoardController:
             player (Player): The player whose units are being updated.
         """
         moving_units = (
-            tilemodel for tilemodel in self.board.tiles[player.deck.army_name]
+            tilemodel for tilemodel in self.gamecontroller.board.tiles[player.deck.army_name]
             if tilemodel.special_capacities
             and "movement" in tilemodel.special_capacities
         )
 
         for tilemodel in moving_units:
             tileview = self._get_one_view_tile(tilemodel.id_tile)
-            if tileview and tileview not in self.view.tiles_hand:
-                self.view.tiles_board_moving.add(tileview)
+            if tileview and tileview not in self.gamecontroller.view.tiles_hand:
+                self.gamecontroller.view.tiles_board_moving.add(tileview)
 
     def _update_tile_model(self,
                         id_tile: str,
@@ -239,15 +243,15 @@ class BoardController:
         tilemodel.rotate_tile(angle_index)
 
         if not self._check_if_tile_on_board(id_tile):
-            self.board.add_tile_to_board(tilemodel)
+            self.gamecontroller.board.add_tile_to_board(tilemodel)
 
         else:
-            self.board.occupied[tilemodel.army_name].append(cube_coordinates)
-            self.board.occupied[tilemodel.army_name].remove(old_board_position)
+            self.gamecontroller.board.occupied[tilemodel.army_name].append(cube_coordinates)
+            self.gamecontroller.board.occupied[tilemodel.army_name].remove(old_board_position)
 
-            del self.board.position_index[tilemodel.army_name]\
+            del self.gamecontroller.board.position_index[tilemodel.army_name]\
                 [old_board_position]
-            self.board.position_index[tilemodel.army_name][cube_coordinates] \
+            self.gamecontroller.board.position_index[tilemodel.army_name][cube_coordinates] \
                 = tilemodel
 
     def _update_board_model(self) -> None:
@@ -258,7 +262,7 @@ class BoardController:
         This method saves the positions and angles of all tiles
         currently displayed on the board view.
 """
-        for tileview in self.view.tiles_board:
+        for tileview in self.gamecontroller.view.tiles_board:
             self._update_tile_model(
             id_tile=tileview.id_tile,
             pixel_position=tileview.rect.topleft,
@@ -270,11 +274,11 @@ class BoardController:
         Updates the attribut `is_netted` of enemy tiles on the board
         affected by netting mechanics.
         """
-        for army in self.board.armies:
-            enemy_army = next_element(self.board.armies, army)
-            enemy_tiles = self.board.position_index[enemy_army]
+        for army in self.gamecontroller.board.armies:
+            enemy_army = next_element(self.gamecontroller.board.armies, army)
+            enemy_tiles = self.gamecontroller.board.position_index[enemy_army]
 
-            for tilemodel in self.board.tiles[army]:
+            for tilemodel in self.gamecontroller.board.tiles[army]:
                 if not tilemodel.net_directions:
                     continue
 
@@ -292,8 +296,8 @@ class BoardController:
         Updates the board view by cleaning the discard zone and the
         sprite tile_board_moving.
         """
-        self.view.remove_tiles_board_moving()
-        self.view.get_tile_to_discard()
+        self.gamecontroller.view.remove_tiles_board_moving()
+        self.gamecontroller.view.get_tile_to_discard()
 
     def _get_one_model_tile(self, id_tile: str) -> Tile:
         """
@@ -311,7 +315,7 @@ class BoardController:
         """
 
         tile = next(
-        (tile for tile in self.board.all_tile if tile.id_tile == id_tile),
+        (tile for tile in self.gamecontroller.board.all_tile if tile.id_tile == id_tile),
         None
     )
         if tile is None:

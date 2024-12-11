@@ -1,9 +1,12 @@
+# This import able to import gamecontroller without circular 
+# import issue
+from __future__ import annotations
+
 import pygame
 from typing import Optional, List, Literal
 
-from scripts.model.model import HexBoard, Player
-from scripts.view.view import View
-from scripts.controllers.tilecontroller import TileController
+from scripts.model.model import  Player
+from scripts.controllers import gamecontroller
 
 class PlayersController:
     """
@@ -17,14 +20,9 @@ class PlayersController:
 
     Attributes
     ----------
-    board (HexBoard): 
-        The game board containing the game state and board positions.
-    players (List[Player]):
-        List of players involved in the game.
-    tileactioncontroller (TileController):
-        A controller responsible for handling actions related to tiles.
-    view (View):
-        The view object that handles rendering and user interface.
+    gamecontroller (GameController): 
+        The main controller with all others sub controllers and
+        models informations.
 
     Methods
     -------
@@ -57,26 +55,17 @@ class PlayersController:
         handle other end-of-turn logic. Return True if player end turn.
     """
     def __init__(self,
-                board: HexBoard, 
-                players: List[Player], 
-                view: View,
-                tileactioncontroller: TileController
-            ) -> None:
+                gamecontroller: gamecontroller.GameController
+                ) -> None:
         """
         Initializes the controller.
 
         Args:
-            board (HexBoard):
-                Game Board model.
-            view (View): 
-                Graphical interface for user interactions and feedback.
-            tileactioncontroller (TileController):
-                Tile controller.
+            gamecontroller (GameController): 
+                The main controller with all others sub controllers and
+                models informations.
         """
-        self.board = board
-        self.players = players
-        self.tileactioncontroller = tileactioncontroller
-        self.view = view
+        self.gamecontroller = gamecontroller
 
     def get_id_tiles_from_hand(self, player: Player) -> List[str]:
         """
@@ -112,7 +101,7 @@ class PlayersController:
             player (Player): The player whose deck size is displayed.
         """
         number_tiles = self.get_size_deck(player)
-        self.view.get_tiles_deck(number_tiles)
+        self.gamecontroller.view.get_tiles_deck(number_tiles)
 
     def draw_hq_tile(self, player: Player) -> None:
         """
@@ -124,7 +113,7 @@ class PlayersController:
         """
         player.hand.add_tile(player.deck.hq_tile)
         id_tile = self.get_id_tiles_from_hand(player)
-        self.view.get_tiles_hand(id_tile)
+        self.gamecontroller.view.get_tiles_hand(id_tile)
 
     def draw_tiles_hand(self,
                         player: Player,
@@ -158,7 +147,7 @@ class PlayersController:
             player.get_tiles(diff) # type: ignore
 
         id_tiles = self.get_id_tiles_from_hand(player)
-        self.view.get_tiles_hand(id_tiles)
+        self.gamecontroller.view.get_tiles_hand(id_tiles)
 
 
     def play_tile_hand(self,
@@ -176,13 +165,13 @@ class PlayersController:
             event_list (List[pygame.event.Event]):
                 The list of pygame events to process.
         """
-        self.view.move_tile_hand(event_list)
-        self.view.move_tile_board(event_list)
+        self.gamecontroller.view.move_tile_hand(event_list)
+        self.gamecontroller.view.move_tile_board(event_list)
 
-        self.tileactioncontroller.actiontile(player, event_list)
+        self.gamecontroller.tileactioncontroller.actiontile(player, event_list)
 
-        self.view.generate_all_sprite_group()
-        self.view.display_all_sprite()
+        self.gamecontroller.view.generate_all_sprite_group()
+        self.gamecontroller.view.display_all_sprite()
 
 
     def end_player_turn(self,
@@ -204,8 +193,8 @@ class PlayersController:
                 True if the player's turn ends successfully,
                 False otherwise.
         """
-        if self.view.endbutton.isvalidated(event_list):
-            id_tileviews_to_keep = self.view.get_id_tile_to_keep()
+        if self.gamecontroller.view.endbutton.isvalidated(event_list):
+            id_tileviews_to_keep = self.gamecontroller.view.get_id_tile_to_keep()
             player.discard_tiles_hand(id_tileviews_to_keep)
 
             return True
