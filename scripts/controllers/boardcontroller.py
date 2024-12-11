@@ -128,7 +128,7 @@ class BoardController:
                         self._update_tile_model(
                                             tileview.id_tile,
                                             tileview.rect.topleft,
-                                            tileview.angle_inde
+                                            tileview.angle_index
                                             )
 
                 elif self._check_if_tile_on_board(tileview.id_tile):
