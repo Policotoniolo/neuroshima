@@ -116,7 +116,7 @@ def test_raise_wrong_cube_coordinate_no_raise():
 ### tests raise_wrong_pixel_coordinate() ###
 
 @pytest.mark.parametrize("coordinates", [
-    ([10,10], ((300,300,300)), (("a")), ((2000,2000)))
+    ([10,10]), ((300,300,300)), (("a",1)), ((2000,2000))
 ])
 def test_raise_wrong_pixel_coordinate(coordinates):
     with pytest.raises(ValueError):
