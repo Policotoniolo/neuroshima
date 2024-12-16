@@ -66,7 +66,7 @@ def list_pixel_to_cube(list_pixel_positions: List[Tuple[int, int]]
         TypeError: if arg not a list
 
     """
-    if not isinstance(list, list_pixel_positions):
+    if not isinstance(list_pixel_positions, list):
         raise TypeError("list_pixel_positions is not a list")
     return [coordinates_pixel_to_cube(position)
             for position in list_pixel_positions
@@ -136,22 +136,20 @@ def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
         list_cube_coordinates (List[Tuple[int, int, int]]): 
             List of cube coordinates
 
-    Raises:
-        KeyError: If pixel position not valide
-
     Returns:
         List[Tuple[int, int]]:  List of pixel coordinates
+
+    Raises:
+        TypeError : if arg not a list
     """
-    try:
-        # Validate input types and lengths
-        [raise_wrong_cube_coordinate(x) for x in list_cube_coordinates]
-        list_pixels_coordinates = [coordinates_cube_to_pixel(x)
-            for x in list_cube_coordinates 
-            if x in list(BOARD_PIXEL_TO_CUBE.values())
-        ]
-        return list_pixels_coordinates
-    except KeyError:
-        raise KeyError("Invalid cube position")
+    if not isinstance(list_cube_coordinates, list):
+        raise TypeError("list_cube_coordinates is not a list")
+    
+    list_pixels_coordinates = [coordinates_cube_to_pixel(x)
+        for x in list_cube_coordinates 
+    ]
+    return list_pixels_coordinates
+
 
 
 def calculate_position(start_position: Tuple[int, int, int],
