@@ -62,7 +62,12 @@ def list_pixel_to_cube(list_pixel_positions: List[Tuple[int, int]]
     Returns:
         List[Tuple[int, int, int]]: List of cube positions
 
+    Raises:
+        TypeError: if arg not a list
+
     """
+    if not isinstance(list, list_pixel_positions):
+        raise TypeError("list_pixel_positions is not a list")
     return [coordinates_pixel_to_cube(position)
             for position in list_pixel_positions
         ]
