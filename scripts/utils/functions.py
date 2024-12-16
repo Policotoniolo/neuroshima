@@ -96,6 +96,7 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
                             ) -> List[Tuple[int, int, int]]:
     """
     Calculate the neighbors in cube coordinates for a given position.
+    Remove positions if outside the game board limit
 
     Args:
         cube_coordinates (Tuple[int, int, int]):
@@ -105,26 +106,25 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
         List[Tuple[int, int, int]]:
             List of neighboring cube coordinates.
     """
-    try: 
-        # Validate input types and lengths
-        raise_wrong_cube_coordinate(cube_coordinates)
-        # Not doing a loop because of pylint which is returning a
-        # ReturnTypeError if so.
-        neighbors = [(
-                cube_coordinates[0] + direction[0],
-                cube_coordinates[1] + direction[1],
-                cube_coordinates[2] + direction[2]
-            )
-            for direction in CUBE_DIRECTION_VECTORS
-        ]
-        neighbors = [position 
-                    for position in neighbors
-                    if all(abs(x) < BOARD_LIMIT for x in position)
-                ]
-        return neighbors
-    except ValueError as ve:
-        print(f"Error: {ve}")
-        raise
+
+    # Validate input types and lengths
+    raise_wrong_cube_coordinate(cube_coordinates)
+    # Not doing a loop because of pylint which is returning a
+    # ReturnTypeError if so.
+    neighbors = [(
+            cube_coordinates[0] + direction[0],
+            cube_coordinates[1] + direction[1],
+            cube_coordinates[2] + direction[2]
+        )
+        for direction in CUBE_DIRECTION_VECTORS
+    ]
+    neighbors = [position 
+                for position in neighbors
+                if all(abs(x) < BOARD_LIMIT for x in position)
+            ]
+    [raise_wrong_cube_coordinate(position)
+        for position in neighbors]
+    return neighbors
 
 
 def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
