@@ -1,6 +1,4 @@
-"""Module providing all tile of the borgo army"""
-import sys
-borgo=[{"kind": "base",
+BORGO=[{"kind": "base",
             "army_name":"borgo",
             "id_tile":"borgo-qg",
             "initiative": [0],
@@ -531,9 +529,3 @@ borgo=[{"kind": "base",
             "module":None,
             "action":None,
             "url_image":"image/armies/borgo-retiaire.png"}]
-
-def test():
-    return borgo
-
-if __name__ == "__main__":
-    print(sys.path)

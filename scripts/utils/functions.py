@@ -62,7 +62,12 @@ def list_pixel_to_cube(list_pixel_positions: List[Tuple[int, int]]
     Returns:
         List[Tuple[int, int, int]]: List of cube positions
 
+    Raises:
+        TypeError: if arg not a list
+
     """
+    if not isinstance(list_pixel_positions, list):
+        raise TypeError("list_pixel_positions is not a list")
     return [coordinates_pixel_to_cube(position)
             for position in list_pixel_positions
         ]
@@ -91,6 +96,7 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
                             ) -> List[Tuple[int, int, int]]:
     """
     Calculate the neighbors in cube coordinates for a given position.
+    Remove positions if outside the game board limit
 
     Args:
         cube_coordinates (Tuple[int, int, int]):
@@ -100,26 +106,25 @@ def get_neighbors_hex_positions(cube_coordinates: Tuple[int, int, int]
         List[Tuple[int, int, int]]:
             List of neighboring cube coordinates.
     """
-    try: 
-        # Validate input types and lengths
-        raise_wrong_cube_coordinate(cube_coordinates)
-        # Not doing a loop because of pylint which is returning a
-        # ReturnTypeError if so.
-        neighbors = [(
-                cube_coordinates[0] + direction[0],
-                cube_coordinates[1] + direction[1],
-                cube_coordinates[2] + direction[2]
-            )
-            for direction in CUBE_DIRECTION_VECTORS
-        ]
-        neighbors = [position 
-                    for position in neighbors
-                    if all(abs(x) < BOARD_LIMIT for x in position)
-                ]
-        return neighbors
-    except ValueError as ve:
-        print(f"Error: {ve}")
-        raise
+
+    # Validate input types and lengths
+    raise_wrong_cube_coordinate(cube_coordinates)
+    # Not doing a loop because of pylint which is returning a
+    # ReturnTypeError if so.
+    neighbors = [(
+            cube_coordinates[0] + direction[0],
+            cube_coordinates[1] + direction[1],
+            cube_coordinates[2] + direction[2]
+        )
+        for direction in CUBE_DIRECTION_VECTORS
+    ]
+    neighbors = [position 
+                for position in neighbors
+                if all(abs(x) < BOARD_LIMIT for x in position)
+            ]
+    [raise_wrong_cube_coordinate(position)
+        for position in neighbors]
+    return neighbors
 
 
 def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
@@ -131,22 +136,20 @@ def list_cubes_to_pixel(list_cube_coordinates: List[Tuple[int, int, int]]
         list_cube_coordinates (List[Tuple[int, int, int]]): 
             List of cube coordinates
 
-    Raises:
-        KeyError: If pixel position not valide
-
     Returns:
         List[Tuple[int, int]]:  List of pixel coordinates
+
+    Raises:
+        TypeError : if arg not a list
     """
-    try:
-        # Validate input types and lengths
-        [raise_wrong_cube_coordinate(x) for x in list_cube_coordinates]
-        list_pixels_coordinates = [coordinates_cube_to_pixel(x)
-            for x in list_cube_coordinates 
-            if x in list(BOARD_PIXEL_TO_CUBE.values())
-        ]
-        return list_pixels_coordinates
-    except KeyError:
-        raise KeyError("Invalid cube position")
+    if not isinstance(list_cube_coordinates, list):
+        raise TypeError("list_cube_coordinates is not a list")
+    
+    list_pixels_coordinates = [coordinates_cube_to_pixel(x)
+        for x in list_cube_coordinates 
+    ]
+    return list_pixels_coordinates
+
 
 
 def calculate_position(start_position: Tuple[int, int, int],
@@ -167,19 +170,14 @@ def calculate_position(start_position: Tuple[int, int, int],
             The resulting position after adding the direction to the
             start position.
     """
-    try:
-        # Validate input types and lengths
-        raise_wrong_cube_coordinate(start_position)
-        raise_wrong_cube_coordinate(direction)
-        # Not doing a loop because of pylint which is returning a
-        # ReturnTypeError if so.
-        return (start_position[0] + direction[0],
-                start_position[1] + direction[1],
-                start_position[2] + direction[2])
-
-    except ValueError as ve:
-        print(f"Error: {ve}")
-        raise
+    # Validate input types and lengths
+    raise_wrong_cube_coordinate(start_position)
+    raise_wrong_cube_coordinate(direction)
+    # Not doing a loop because of pylint which is returning a
+    # ReturnTypeError if so.
+    return (start_position[0] + direction[0],
+            start_position[1] + direction[1],
+            start_position[2] + direction[2])
 
 def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int],
                                 board_limit= BOARD_LIMIT

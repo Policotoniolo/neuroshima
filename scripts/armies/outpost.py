@@ -1,6 +1,5 @@
-"""Module providing all tiles of the green army"""
-
-outpost=[{"kind": "base",
+#Module providing all tiles of the green army
+OUTPOST=[{"kind": "base",
             "army_name":"outpost",
             "id_tile":"outpost-qg",
             "initiative": [0],
