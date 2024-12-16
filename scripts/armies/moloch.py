@@ -1,5 +1,4 @@
-"""Module providing all tiles of the moloch army"""
-moloch=[{"kind": "base",
+MOLOCH=[{"kind": "base",
             "army_name":"moloch",
             "id_tile":"moloch-qg",
             "initiative": [0],
