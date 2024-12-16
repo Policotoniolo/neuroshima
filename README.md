@@ -1,136 +1,139 @@
 # Neuroshima Game
+$${\color{red}WARNING\space CODE\space NOT\space FINISHED}$$	
+The script is not yet complete. At present, we can only generate game phases between players, but there are still a number of problems and ergonomics to be reviewed. Unit tests are also planned.
 
-Ce projet à pour objectif de reproduire le jeu de plateau Neuroshima Hex ([site web neuroshima](https://neuroshima-hex.azharis.fr/)).
-Je n'ai aucune licence ni droit, d'où le repo en privé.
+Please let me know if you have any recommendations or improvements if you want, I'd be happy to - it's my first project like this! 
 
-Seul l'affrontement en 1 contre 1 (constituant le mode de jeu principal) sera implementé ici. Les joueurs devront jouer sur le même pc.
+---
 
-ATTENTION : le script n'est pas encore terminé. On peut actuellemnt juste générer des phases de jeux entre joueurs consistant juste à poser des tuiles sur le borde
+The aim of this project is to reproduce the board game Neuroshima Hex ([web site neuroshima](https://neuroshima-hex.azharis.fr/)).
+I don't have any licenses or rights, so this is a little project just for practice.
 
-## Règle du jeu
-[LIEN REGLE EN LIGNE](https://neuroshima-hex.azharis.fr/rs/NH3_regles_FR.pdf)
+Only 1 vs 1 (the main game mode) will be implemented here. Players will have to play on the same PC.
 
-Sinon voila un résumé :
 
-Le jeu se joue sur un board hexagonal constitué de 19 hexagones.
+## Game rules
+[ONLINE RULE LINK](https://neuroshima-hex.azharis.fr/rs/NH3_regles_FR.pdf)
+
+Otherwise here's a summary:
+
+The game is played on a hexagonal board made up of 19 hexagons.
 ![alt text](https://i2.wp.com/www.toysandgeek.fr/images/2014/03/neuroshima-5.jpg)
 
-Chaque joueur possède une armée constitué de 35 tuiles dont une tuile QG (exemple armée [moloch](https://neuroshima-hex.azharis.fr/armee/tuiles/moloch.html))
+Each player has an army made up of 35 tiles including one HQ tile (example: army [moloch](https://neuroshima-hex.azharis.fr/armee/tuiles/moloch.html))
 
-#### But du jeu : 
-Le but de chaque joueur est d'attaquer le Quartier Général (QG) de son
-adversaire. Au début de la partie, chaque QG dispose de 20 « Points de Vie ».
-Si, au cours de la partie, un QG perd son dernier Point de Vie, il est détruit etle joueur le contrôlant est éliminé de la partie.
+#### Aim of the game: 
+Each player's aim is to attack his opponent's Headquarters (HQ).
+opponent's HQ. At the start of the game, each HQ has 20 “Life Points”.
+If, during the course of the game, an HQ loses its last Life Point, it is destroyed and the player controlling it is eliminated from the game.
 
-Si, à la fin de la partie, aucun QG n'a été détruit, les joueurs comparent le nombre de Points de Vie de leurs QG. Le joueur dont le QG est le moins endommagé (qui a le plus de Points de Vie) remporte la partie
+If, at the end of the game, no HQ has been destroyed, players compare the number of Life Points in their HQs. The player with the least damaged HQ (the one with the most Life Points) wins the game.
 
-#### Phases de jeu:
-##### 1. Initiation du jeu : 
-Chaque joueur mélange son deck constitué des tuiles face cachée (sans qg) et le premier joueur est tiré aleatoirement.
+#### Game phases:
+##### 1. Initiating the game : 
+Each player shuffles his deck of face-down tiles (without qg) and the first player is drawn at random.
 
 Le premier joueur puis le second posent chacun leur qg sur le borde
-##### 2. Tour joueur
-À son tour, un joueur pioche des tuiles jusqu'à en avoir 3 (c'est-à-dire qu'à
-aucun moment il ne peut avoir plus de 3 tuiles devant lui) et les place face
-visible devant lui. 
-Cas particulier : on tire qu'une tuile au tour 1 et 2 au tour 2 afin d'équilibrer le début.
 
-Il doit, avant toute autre chose, défausser une de ces 3 tuiles (généralement la moins utile) dans sa défausse. Il choisit ensuite ce qu'il fait avec chacune des 2 tuiles restantes : il peut les jouer, les conserver pour les tours à venir ou les défausser.
+##### 2. Player's turn
+On his turn, a player draws tiles until he has 3 (i.e. at no time can he have more than 3 tiles in front of him) and places them face down on the board. 
+Special case: only one tile is drawn on turn 1, and 2 on turn 2, to balance out the beginning.
 
-Remarque : je n'ai pas encore codé l'obligation de devoir defausser une tuile
+Before doing anything else, he must discard one of these 3 tiles (generally the least useful) into his discard pile. He then chooses what to do with each of the remaining 2 tiles: he can play them, keep them for future turns, or discard them.
 
-Un joueur peut défausser n'importe quel nombre de tuiles qu'il a piochées.
-Les tuiles piochées doivent être visibles des deux joueurs et placées face visible devant le joueur qui les pioche.
+A player may discard any number of tiles he has drawn.
+Drawn tiles must be visible to both players and placed face-up in front of the player who draws them.
 
-Il y a deux types de tuiles dans le jeu : les tuiles Action et les tuiles Unité. Ces deux types sont bien différenciés afin d'être facilement identifiés : les tuiles Action présentent un 
-grand et unique pictogramme noir alors que les tuiles Unité contiennent davantage d'informations.
-Les tuiles actions représentent des actions spécifiques et immédiates. Elles ne sont pas placées sur le plateau de jeu.
-Les tuiles Unité représentent les Unités de votre armée. Chaque armée dispose de 3 types d'Unités : un QG, des Combattants et des Modules. Pour jouer une tuile Unité, le joueurla place sur un hexagone libre de son choix surle plateau.
+There are two types of tile in the game: Action tiles and Unit tiles. These two types are clearly differentiated so that they can be easily identified: Action tiles feature a single, large black pictogram, while Unit tiles feature a single, large black pictogram. 
+pictogram, while Unit tiles contain more information.
+Action tiles represent specific, immediate actions. They are not placed on the game board.
+Unit tiles represent the units in your army. Each army has 3 types of Unit: HQ, Fighters and Modules. To play a Unit tile, the player places it on a free hex of his choice on the board.
+
 
 ![alt text](image/readme_images/exemple_tuiles.png)
 
-Si, avant la fin de la partie, un des joueurs pioche sa dernière tuile Armée mais
-qu'il a moins de 3 tuiles devant lui, il n'est pas obligé d'en défausser.
-Une fois qu'un joueur a fini son tour (piocher, jouer ou défausser des tuiles et
-résoudre les actions désirées), il en informe son adversaire
+If, before the end of the game, one of the players draws his last Army tile but has
+has less than 3 tiles in front of him, he is not obliged to discard any.
+Once a player has completed his turn (drawing, playing or discarding tiles and
+desired actions), he informs his opponent
 
-##### 3. Phase de combat
-Si le board se retrouve remplit ou si un joueur joue une tuile action déclanchant un combat, une phase de combat est engagée.
-Les effets des tuiles sont appliqués par ordre d'initiative (chiffre en noir sur les tuiles unités). Les effets des modules sont permanent tant que ceux ci sont sur le borde.
-Le combat se déroule par phase d'initiative de la plus grande à la plus petite. A chaque phase les tuiles unités appliquent leurs dégats autres.
+##### 3. Combat phase
+If the board becomes full, or if a player plays an action tile which triggers a combat, a combat phase is initiated.
+Tile effects are applied in order of initiative (black number on unit tiles). Module effects are permanent as long as the module is on the board.
+Combat takes place in initiative phases, from largest to smallest. In each phase, the unit tiles apply their other damage.
+
 ![alt text](image/readme_images/caracteristiques_tuiles.png)
-Le combat se termine quand toutes les phases d'initiative ont été faites.
-Plus de détail dans le lien vers les règles en ligne. page 5,6,7 Je n'ai pas encore eu le temps de générer les batailles dans ce projet. 
+The battle ends when all initiative phases have been completed.
+More details in the link to the online rules.
 [LIEN REGLE EN LIGNE](https://neuroshima-hex.azharis.fr/rs/NH3_regles_FR.pdf)
 
 
-##### 4. Fin de partie et Victoire 
+##### 4. End of game and victory 
 
-Une fois que l'un des joueurs pioche la dernière tuile de son Armée, il joue son tour normalement. Son adversaire joue ensuite un dernier tour et le Combat Final s'engage.
+Once a player has drawn the last tile from his army, he takes his turn as normal. His opponent then takes a final turn, and the Final Combat begins.
 
-La partie se termine après le Combat Final ou dès que les Points de Vie d'un QG sont réduits à zéro.
+The game ends after the Final Combat or as soon as an HQ's Life Points are reduced to zero.
 
-Si l'un des QG est détruit, la partie s'achève et le joueur dont le QG est encore debout l'emporte.
+If one of the HQs is destroyed, the game ends and the player whose HQ is still standing wins.
 
-Si l'un des QG est détruit lors d'un Combat, la partie ne s'achève qu'à la fin de celui-ci. Si l'autre QG est également détruit, la partie s'achève sur un match nul.
+If one of the HQs is destroyed during a battle, the game does not end until the battle is over. If the other HQ is also destroyed, the game ends in a draw.
 
-Si aucun des QG n'est détruit à la fin du Combat Final, le joueur contrôlant le QG ayant le plus de Points de Vie est le gagnant
+If neither HQ is destroyed at the end of the Final Combat, the player controlling the HQ with the most Life Points wins.
 
 
+## CODE EXPLANATION
 
-## EXPLICATION CODE
+The entire script can be found in the “scripts” folder.
+The code is built around a Model-View-Controller (M-V-C) pattern.
 
-Tout le script se trouve dans le dossier "scripts"
-Le code est construit autour d'un motif Modèle-vue-contrôleur (M-V-C).
+- the model (scripts.model) contains the data to be displayed;
+- the view (scripts.view) contains the presentation of the graphical interface;
+- the controllers (scripts.controllers) contain the logic for user actions.
 
-- le modèle (model_script.py) contient les données à afficher ;
-- la vue (view.py) contient la présentation de l'interface graphique ;
-- le contrôleur (controler_script.py) contient la logique concernant les actions effectuées par l'utilisateur
+The “scripts.utils.function.py” file: contains generic functions.
+scripts.utils.config.py": contains generic variables.
 
-Le fichier "function.py" : contient des fonctions génériques.
-le fichier "battleevaluator.py" : module pas encore terminé. permettra de gérer le déclanchement des combats dans le modul "controler_scripts"
-
-Le scripts se base essentiellement sur la bibliothèque Pygame de python pour générer les différents élements du jeu.
+The scripts use the Pygame python library to generate the various game elements.
 
 
 ---
 ### MODEL 
 
-Le model contient les différents éléments du jeu, représentés par des class:
-- Class Tile : représente une tuile. S'initialise avec toutes les caractéristiques d'une tuile (type, attaque, point de vie etc...)
-- Class Deck : représente le deck d'une armée, c'est à dire 35 instances de Tile initialisés grâce aux fichiers du dossier scripts/armies. 
-- Class Hand : représente la main d'un joueur, c'est à dire les 3 tuiles disponibles en début d'un tour
-- Class Player : représente un joureur. Il possède une instance de Deck et de main
-- Class HexBoard : représente le plateau de jeu. Les tuiles jouées y sont enregistrés dans des attributs.
+The model contains the various elements of the game, represented by classes:
+- Class Tile: represents a tile. Initializes with all tile characteristics (type, attack, hit point, etc.).
+- Class Deck: represents an army's deck, i.e. 35 instances of Tile initialized with files from the scripts/armies folder. 
+- Class Hand: represents a player's hand, i.e. the 3 tiles available at the start of a turn.
+- Class Player: represents a player. He owns an instance of Deck and Hand.
+- Class HexBoard: represents the game board. Played tiles are recorded in attributes.
 
-#### Remarque position et l'angle de rotation des tuiles :
+#### Note position and angle of rotation of tiles:
 
-La position sur board sont des coordonnées cubiques (q,r,s):
+Position on board are cubic coordinates (q,r,s):
 
 ![alt text](image/readme_images/cube_coordinates2.png)
 
 
-Les attaques des tuiles, filets et boucliers sont aussi définits par des coordonnées. 
-C'est coordonnées représentes l'angles par rapport à la position (0,0,0) sur le board et donc la direction vers laquelle l'attaque (ou autre) à lieu.
+Tile, net, shield and attacks are also defined by coordinates. 
+These coordinates represent the angle with respect to the position (0,0,0) on the board, and therefore the direction in which the attack (or other) takes place.
 
-Un index a été definit selon l'angle de rotation de la tuile. Celui ci permet de recalculer les directions des attributs attaque, boucliers et filets de la tuile sui celle ci a été rotatée
+An index has been defined according to the angle of rotation of the tile. This recalculates the directions of the tile's attack, shield and net attributes when the tile has been rotated.
 
 ### VIEW
 
-un sprite est un objet de la bibliothèque pygame. Cela représente en qlq sorte un image
+a sprite is an object in the pygame library. It represents a kind of image.
 
-Le fichier view.py contient les différens éléments à afficher représentés chacun par une class. Ils sont utilisés dans la Class View du fichier.
-liste des élements utilisés dans la class View:
- - TileView : représente une tuile sous forme d'un sprite avec quelques caractéristiques en plus
- - Hexagone : représente un hexagone (une zone) du board
- - BoardZone : représente l'ensemble des hexagones sur le board
- - EndButton : button permettant la fin du tour
- - RerollButton : Pas encore utilisé, permettra de re-initialiser le tour
- - DiscardZone : Zone permettant de jeter une tuile. Ils suffit de faire glisser une tuile dessus
- - KeepZone : Zone permettant de conserver une tuile pour le tour suivant du joueur. Ils suffit de faire glisser une tuile dessus.
- - Button : permet de générer un bouton sur une position donnée du board
+The view.py file contains the various elements to be displayed, each represented by a class. They are used in the file's Class View.
+list of elements used in the View class:
+ - TileView: represents a tile in sprite form, with a few extra features
+ - Hexagon: represents a hexagon (a zone) on the board
+ - BoardZone: represents all hexagons on the board
+ - EndButton: button to end the turn
+ - RerollButton: not yet used, will re-initialize the turn
+ - DiscardZone: zone for discarding a tile. Simply drag a tile over it
+ - KeepZone: Zone used to keep a tile for the player's next turn. Simply drag a tile over it.
+ - Button: generates a button on a given board position.
 
-Ici les position des tuiles sont calculés par rapport à la posistion (x,y) des pixels de l'écran
+Here, tile positions are calculated in relation to the position (x,y) of screen pixels.
 
 
 Board positions : 
@@ -146,7 +149,7 @@ Board positions :
                     7 (376,455)               16 (524,455)
                                 12 (450,499) 
 
-Le liens entre les pixels et les coordonnées cubes sont le ssuivants :
+The links between pixels and cube coordinates are as follows:
 
     {1:[(302,241), (-2,0,2)], 
     2:[(301,326), (-2,1,1)],
@@ -168,30 +171,45 @@ Le liens entre les pixels et les coordonnées cubes sont le ssuivants :
     18:[(598,328), (2,-1,-1)],
     19:[(598,413), (2,0,-2)]}
 
-### CONTROLER
-Ce module fait le lien entre le model et la vue.
-La fonction lançant le jeu est GameController.run()
+### CONTROLLER
+This module is the link between the model and the view.
+The main controller is gamecontroller.py (GameController). It contains the logic for the game. It uses different sub-controllers:
+
+- moduleevaluator.py (ModuleEvaluator): 
+    Handles evaluation of specific modules in the game.
+- tileactioncontroller.py (TileController): 
+    Manages tile-specific actions, such as movement or special
+    abilities.
+- boardcontroller.py (BoardController): 
+    Responsible for handling board updates and interactions.
+- battleevaluator.py (BattleEvaluator): 
+    Evaluates battles between players on the board.
+- playerscontroller.py (PlayersController): 
+    Handles player-specific actions, such as drawing tiles or
+    ending turns.
 
 
 
-## LANCEMENT DU JEU
 
-Le jeu s'effectue en executant le script "scripts/controler_script.py". Un scripts "main.py" sera fait plus tard pour simplifier le lancement.
 
-une fenetre alors s'ouvre
+## LAUNCHING THE GAME
+
+The game is started by executing the “main.py” file.
+
+A window opens
 
 ![alt text](image/readme_images/partie1.png)
 
-on peut alors drag and drop la tuile qg sur le board et ensuite cliquer sur le button fin de tour. L'opération se repète alors pour le prochain joueur.
+you can then drag and drop the qg tile onto the board and click on the end-of-turn button. The operation is repeated for the next player.
 
 ![alt text](image/readme_images/partie2.png)
 
-Ensuite les joueurs pourront tirer des tuiles et les jouer. Comme les QG les tuiles sont a poser (drag and drop) sur le board. Un clique droit sur une tuile permet de la rotater.
+Players can then draw tiles and play them. Like the HQs, the tiles are dragged and dropped onto the board. Right-click on a tile to rotate it.
 
 ![alt text](image/readme_images/video.gif)
 
-Pour les tuiles actions, des zones en surbrillance sont afficher pour les actions. Seul la tuile combat (tuile avec une sorte d'explosion dessus) ne fait rien pour le moment car je n'ai pas encore codé les combats.
+For action tiles, highlighted areas are displayed for actions. Only the combat tile (tile with a kind of explosion on it) doesn't do anything for the moment, as I haven't coded the combats yet.
 
 ![alt text](image/readme_images/video2.gif)
 
-IL n'y a pas encore de fin vue que les combats ne peuvent pas être lancés.
+There's no ending yet, as battles can't be launched.
