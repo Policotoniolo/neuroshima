@@ -170,19 +170,14 @@ def calculate_position(start_position: Tuple[int, int, int],
             The resulting position after adding the direction to the
             start position.
     """
-    try:
-        # Validate input types and lengths
-        raise_wrong_cube_coordinate(start_position)
-        raise_wrong_cube_coordinate(direction)
-        # Not doing a loop because of pylint which is returning a
-        # ReturnTypeError if so.
-        return (start_position[0] + direction[0],
-                start_position[1] + direction[1],
-                start_position[2] + direction[2])
-
-    except ValueError as ve:
-        print(f"Error: {ve}")
-        raise
+    # Validate input types and lengths
+    raise_wrong_cube_coordinate(start_position)
+    raise_wrong_cube_coordinate(direction)
+    # Not doing a loop because of pylint which is returning a
+    # ReturnTypeError if so.
+    return (start_position[0] + direction[0],
+            start_position[1] + direction[1],
+            start_position[2] + direction[2])
 
 def raise_wrong_cube_coordinate(cube_coordinate: Tuple[int, int, int],
                                 board_limit= BOARD_LIMIT
