@@ -153,10 +153,10 @@ class Tile:
         if rotation_diff == 0:
             return
 
-        self._rotate_attacks(new_rotation_index)
-        self._rotate_shield(new_rotation_index)
-        self._rotate_net(new_rotation_index)
-        self._rotate_module(new_rotation_index)
+        self._rotate_attacks(rotation_diff)
+        self._rotate_shield(rotation_diff)
+        self._rotate_net(rotation_diff)
+        self._rotate_module(rotation_diff)
         self.rotational_index = new_rotation_index
 
     # --- MÉTHODES PRIVÉES ---
@@ -214,15 +214,17 @@ class Tile:
             List[Tuple[int, int, int]]:
                 A new list of directions after applying the rotation.
         """
-        return [
-            (
-                self._direction_positive_rotation(direction)
-                if rotation_diff > 0
-                else self._direction_negative_rotation(direction)
-            )
-            for _ in range(abs(rotation_diff))
-            for direction in directions
-        ]
+        new_directions = []
+        for direction in directions:
+            new_direction = direction
+            for _ in range(abs(rotation_diff)):
+                new_direction = (
+                    self._direction_positive_rotation(new_direction)
+                    if rotation_diff > 0
+                    else self._direction_negative_rotation(new_direction)
+                )
+            new_directions.append(new_direction)
+        return new_directions
 
     def _rotate_shield(self, rotation_diff: int) -> None:
         """
