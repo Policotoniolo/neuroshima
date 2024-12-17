@@ -475,7 +475,7 @@ class Hand:
         Raises:.
             ValueError: If the hand contains already three tiles.
         """
-        if len(self.hand_tiles) > 3:
+        if len(self.hand_tiles) >= 3:
             raise ValueError("Cannot add more than 3 tiles to the hand.")
         self.hand_tiles.append(tile)
 
