@@ -15,7 +15,7 @@ class TestTile():
             army_name="borgo",
             id_tile="borgo-mutant1",
             initiative=[0],
-            range_attacks_direction=[(-1, 0, 1),(0, -1, +1), (1, -1, 0)],
+            range_attacks_direction=[(-1,0,1),(0, -1, +1), (1, -1, 0)],
             range_attacks_power=[1,1,1],
             cac_attacks_direction=[(-1, 0, 1),(0, -1, +1), (1, -1, 0)],
             cac_attacks_power=[1,1,1],
@@ -205,13 +205,13 @@ class TestDeck:
 ### Tests Deck Class ###
 
 class TestHand():
-    @mock.patch('scripts.model.model.Tile')
+    @mock.patch('scripts.model.model.Tile',autospec=True)
     def setup_method(self, method, mocktile):
         print(f"Setting up {method}")
 
         self.hand = model.Hand()
 
-        mocktile.id_tile.return_value = 'test_tile'
+        mocktile.id_tile = 'test_tile'
         self.mocktile = mocktile
         self.hand.hand_tiles.append(mocktile)
 
@@ -224,13 +224,13 @@ class TestHand():
 
     @mock.patch('scripts.model.model.Tile')
     def test_add_tile_success(self, newmocktile):
-        newmocktile.id_tile.return_value = 'new_test_tile'
+        newmocktile.id_tile = 'new_test_tile'
         self.hand.add_tile(newmocktile)
         assert len(self.hand.hand_tiles) == 2
         assert newmocktile in self.hand.hand_tiles
         assert self.mocktile in self.hand.hand_tiles
 
-    @mock.patch('scripts.model.model.Tile')
+    @mock.patch('scripts.model.model.Tile',autospec=True)
     def test_add_tile_wrong(self, newmocktile):
         self.hand.add_tile(newmocktile)
         self.hand.add_tile(newmocktile)
@@ -243,8 +243,8 @@ class TestHand():
 
     @mock.patch('scripts.model.model.Tile')
     def test_discard_tile_wrong(self, mockwrongtile):
-        mockwrongtile.id_tile.return_value = "wrong_tile"
-        with pytest.raises(ValueError):
+        mockwrongtile.id_tile = "wrong_tile"
+        with pytest.raises(ValueError, match="Tile wrong_tile not found in hand."):
             self.hand.discard_tile([mockwrongtile])
 
     def test_get_tile_by_id_success(self):
@@ -344,10 +344,17 @@ class TestPlayer():
         assert self.player.hand.hand_tiles == old_hand
         assert self.player.deck.tiles == old_deck
 
-    def test_discard_tiles_hand_success(self):
-        pass
-
-    def test_discard_tiles_hand_empty_hand(self):
+    def test_discard_tiles_hand_empty(self):
         self.player.hand.hand_tiles = []
-        result = self.player.discard_tiles_hand()
-        assert result == None
+        assert self.player.discard_tiles_hand() is None
+
+    @mock.patch('scripts.model.model.Tile')
+    @mock.patch('scripts.model.model.Tile')
+    def test_discard_tiles_hand_success(self, mocktile1, mocktile2):
+        mocktile1.id_tile = 'id_tile_1'
+        mocktile2.id_tile = 'id_tile_2'
+        self.player.hand.hand_tiles = [mocktile1, mocktile2]
+        self.player.deck.defausse = []
+        self.player.discard_tiles_hand(['id_tile_1'])
+        assert self.player.hand.hand_tiles == [mocktile1]
+        assert self.player.deck.defausse ==  [mocktile2]
