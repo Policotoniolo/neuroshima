@@ -1,4 +1,4 @@
-BORGO=[{"kind": "base",
+borgo=[{"kind": "base",
             "army_name":"borgo",
             "id_tile":"borgo-qg",
             "initiative": [0],

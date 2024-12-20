@@ -1,4 +1,4 @@
-MOLOCH=[{"kind": "base",
+moloch=[{"kind": "base",
             "army_name":"moloch",
             "id_tile":"moloch-qg",
             "initiative": [0],
