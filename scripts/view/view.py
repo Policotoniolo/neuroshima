@@ -82,20 +82,20 @@ class TileManipulator:
         Preloads rotated image of the sprite image.
         
         Return:
-            _ (List[pygame.Surface]): Rotated image
+            _ (pygame.Surface): Rotated image
         """
-        #Rotate image
+        # Rotate image
         rotated_image = pygame.transform.rotate(
-                    pygame.image.load(self.sprite.url_image),
-                    angle = ANGLES[self.sprite.angle_index]
-                    )
+            pygame.image.load(self.sprite.url_image),
+            ANGLES[self.sprite.angle_index]
+        )
 
-        #Reshape image to avoid weird transfo. The image is not a square
-        if self.sprite.angle_index not in [0,3]:
-            rotated_image = rotated_image.subsurface((25, 42,200,173))
+        # Reshape image to avoid weird transformation. The image is not a square
+        if self.sprite.angle_index not in [0, 3]:
+            rotated_image = rotated_image.subsurface(pygame.Rect(25, 42, 200, 173))
 
-        #Resize image
-        rotated_image = pygame.transform.smoothscale(rotated_image, (81,70))
+        # Resize image
+        rotated_image = pygame.transform.smoothscale(rotated_image, (81, 70))
         return rotated_image
 
     def _update_angle(self, event_list: List[Event]) -> None:
@@ -201,7 +201,6 @@ class TileView(pygame.sprite.Sprite):
             event_list (List[Event]): pygame event list
         """
         self.manipulator.update(event_list)
-        self.image = self.image if self.manipulator.dragging else self.image
         self._clean_postition()
 
     def click_tile(self, event_list: List[Event], surface: pygame.Surface
